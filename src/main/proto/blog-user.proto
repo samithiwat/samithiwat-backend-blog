@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package blog_user;
+
+import "dto.proto";
+
+option java_multiple_files = true;
+option java_package = "com.samithiwat.user.grpc.bloguser";
+option java_outer_classname = "BlogUser";
+
+service BlogUserService{
+  rpc findOne(FindOneUserRequest) returns (BlogUserResponse) {}
+  rpc create(CreateUserRequest) returns (BlogUserResponse) {}
+  rpc update(UpdateUserRequest) returns (BlogUserResponse) {}
+  rpc delete(DeleteUserRequest) returns (BlogUserResponse) {}
+}
+
+message BlogUserResponse {
+  int32 StatusCode = 1;
+  repeated string errors = 2;
+  dto.BlogUser data = 3;
+}
+
+// findOne
+
+message FindOneUserRequest{
+  uint32 id = 1;
+}
+
+// create
+
+message CreateUserRequest{
+  uint32 userId = 1;
+  string description = 2;
+}
+
+// update
+
+message UpdateUserRequest{
+  uint32 id = 1;
+  uint32 userId = 2;
+  string description = 3;
+}
+
+// delete
+
+message DeleteUserRequest{
+  uint32 id = 1;
+}

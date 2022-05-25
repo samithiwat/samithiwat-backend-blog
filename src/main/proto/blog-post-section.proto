@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package blog_post_section;
+
+import "dto.proto";
+
+option java_multiple_files = true;
+option java_package = "com.samithiwat.user.grpc.blogsection";
+option java_outer_classname = "BlogPostSection";
+
+service BlogPostSectionService{
+  rpc findOne(FindOnePostRequest) returns (BlogPostSectionResponse) {}
+  rpc create(CreatePostRequest) returns (BlogPostSectionResponse) {}
+  rpc update(UpdatePostRequest) returns (BlogPostSectionResponse) {}
+  rpc delete(DeletePostRequest) returns (BlogPostSectionResponse) {}
+}
+
+message BlogPostSectionResponse {
+  int32 StatusCode = 1;
+  repeated string errors = 2;
+  dto.BlogPostSection data = 3;
+}
+
+// findOne
+
+message FindOnePostRequest{
+  uint32 id = 1;
+}
+
+// create
+
+message CreatePostRequest{
+  uint32 postId = 1;
+  uint32 order = 2;
+  dto.PostContentType contentType = 3;
+  string content = 4;
+}
+
+// update
+
+message UpdatePostRequest{
+  uint32 id = 1;
+  uint32 order = 2;
+  string content = 3;
+}
+
+// delete
+
+message DeletePostRequest{
+  uint32 id = 1;
+}
