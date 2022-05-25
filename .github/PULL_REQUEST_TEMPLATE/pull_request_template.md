@@ -10,4 +10,3 @@
 
 - [ ] Run test
 - [ ] Test build
-- [ ] Wrote coverage tests
