@@ -5,7 +5,7 @@ package blog_post_section;
 import "dto.proto";
 
 option java_multiple_files = true;
-option java_package = "com.samithiwat.user.grpc.blogsection";
+option java_package = "com.samithiwat.post.grpc.blogsection";
 option java_outer_classname = "BlogPostSection";
 
 service BlogPostSectionService{
