@@ -3,7 +3,7 @@ package com.samithiwat.post.post;
 import com.samithiwat.post.grpc.blogpost.*;
 import io.grpc.stub.StreamObserver;
 
-public class PostServiceImpl extends BlogPostServiceGrpc.BlogPostServiceImplBase {
+public class BlogPostServiceImpl extends BlogPostServiceGrpc.BlogPostServiceImplBase {
     @Override
     public void findAll(FindAllPostRequest request, StreamObserver<BlogPostPaginationResponse> responseObserver) {
         super.findAll(request, responseObserver);
