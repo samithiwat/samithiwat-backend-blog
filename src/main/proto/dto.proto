@@ -116,7 +116,7 @@ message BlogPost{
 message BlogPostSection{
   uint32 id = 1;
   uint32 postId = 2;
-  uint32 order = 3;
+  uint32 pos = 3;
   PostContentType contentType = 4;
   string content = 5;
 }

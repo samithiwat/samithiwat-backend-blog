@@ -15,8 +15,8 @@ import java.time.Instant;
 public class BlogSection {
     public BlogSection() {}
 
-    public BlogSection(int order, ContentType contentType, String content){
-        setOrder(order);
+    public BlogSection(int pos, ContentType contentType, String content){
+        setPos(pos);
         setContentType(contentType);
         setContent(content);
     }
@@ -26,9 +26,8 @@ public class BlogSection {
     private Long id;
 
     @Column
-    private int order;
+    private int pos;
 
-    @Column
     @Enumerated(EnumType.ORDINAL)
     private ContentType contentType;
 
@@ -53,12 +52,12 @@ public class BlogSection {
         this.id = id;
     }
 
-    public int getOrder() {
-        return order;
+    public int getPos() {
+        return pos;
     }
 
-    public void setOrder(int order) {
-        this.order = order;
+    public void setPos(int pos) {
+        this.pos = pos;
     }
 
     public ContentType getContentType() {

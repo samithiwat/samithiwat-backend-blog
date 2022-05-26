@@ -31,7 +31,7 @@ message FindOnePostSectionRequest{
 
 message CreatePostSectionRequest{
   uint32 postId = 1;
-  uint32 order = 2;
+  uint32 pos = 2;
   dto.PostContentType contentType = 3;
   string content = 4;
 }
@@ -40,7 +40,7 @@ message CreatePostSectionRequest{
 
 message UpdatePostSectionRequest{
   uint32 id = 1;
-  uint32 order = 2;
+  uint32 pos = 2;
   string content = 3;
 }
 

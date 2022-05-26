@@ -71,21 +71,21 @@ public class BlogSectionServiceTest {
         this.sectionDtos = new ArrayList<BlogPostSection>();
         this.sectionDto = BlogPostSection.newBuilder()
                 .setId(1)
-                .setOrder(this.section.get().getOrder())
+                .setPos(this.section.get().getPos())
                 .setContentType(PostContentType.IMAGE)
                 .setContent(this.section.get().getContent())
                 .build();
 
         BlogPostSection sectionDto2 = BlogPostSection.newBuilder()
                 .setId(2)
-                .setOrder(section2.getOrder())
+                .setPos(section2.getPos())
                 .setContentType(PostContentType.TEXT)
                 .setContent(section2.getContent())
                 .build();
 
         BlogPostSection sectionDto3 = BlogPostSection.newBuilder()
                 .setId(3)
-                .setOrder(section3.getOrder())
+                .setPos(section3.getPos())
                 .setContentType(PostContentType.CODE)
                 .setContent(section3.getContent())
                 .build();
@@ -155,7 +155,7 @@ public class BlogSectionServiceTest {
 
         CreatePostSectionRequest req = CreatePostSectionRequest.newBuilder()
                 .setPostId(1)
-                .setOrder(this.sectionDto.getOrder())
+                .setPos(this.sectionDto.getPos())
                 .setContentType(this.sectionDto.getContentType())
                 .setContent(this.sectionDto.getContent())
                 .build();
@@ -177,35 +177,5 @@ public class BlogSectionServiceTest {
         Assertions.assertEquals(HttpStatus.CREATED.value(), result.getStatusCode());
         Assertions.assertEquals(0, result.getErrorsCount());
         Assertions.assertEquals(this.sectionDto, result.getData());
-    }
-
-    @Test
-    public void testCreateDuplicatedSlug() throws Exception {
-        Mockito.doThrow(new DuplicateKeyException("Duplicated key constraint")).when(this.repository).save(Mockito.any());
-
-        CreatePostSectionRequest req = CreatePostSectionRequest.newBuilder()
-                .setPostId(1)
-                .setOrder(this.sectionDto.getOrder())
-                .setContentType(this.sectionDto.getContentType())
-                .setContent(this.sectionDto.getContent())
-                .build();
-
-        StreamRecorder<BlogPostSectionResponse> res = StreamRecorder.create();
-
-        service.create(req, res);
-
-        if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
-            Assertions.fail();
-        }
-
-        List<BlogPostSectionResponse> results = res.getValues();
-
-        Assertions.assertEquals(1, results.size());
-
-        BlogPostSectionResponse result = results.get(0);
-
-        Assertions.assertEquals(HttpStatus.UNPROCESSABLE_ENTITY.value(), result.getStatusCode());
-        Assertions.assertEquals(1, result.getErrorsCount());
-        Assertions.assertEquals(BlogPostSection.newBuilder().build(), result.getData());
     }
 }

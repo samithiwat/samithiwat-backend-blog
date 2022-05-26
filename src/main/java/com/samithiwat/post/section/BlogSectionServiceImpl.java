@@ -30,7 +30,7 @@ public class BlogSectionServiceImpl extends BlogPostSectionServiceGrpc.BlogPostS
 
         com.samithiwat.post.grpc.dto.BlogPostSection result = BlogPostSection.newBuilder()
                 .setId(Math.toIntExact(section.getId()))
-                .setOrder(section.getOrder())
+                .setPos(section.getPos())
                 .setContentTypeValue(RawToDtoContentType(section.getContentType()).getNumber())
                 .setContent(section.getContent())
                 .build();
@@ -49,33 +49,24 @@ public class BlogSectionServiceImpl extends BlogPostSectionServiceGrpc.BlogPostS
         // TODO: Implement relationship with post
 
         BlogSection sectionDto = new BlogSection(
-                request.getOrder(),
+                request.getPos(),
                 DtoToRawContentType(request.getContentType()),
                 request.getContent()
         );
 
-        try{
-            BlogSection section = this.repository.save(sectionDto);
-            com.samithiwat.post.grpc.dto.BlogPostSection result = BlogPostSection.newBuilder()
-                    .setId(Math.toIntExact(section.getId()))
-                    .setOrder(section.getOrder())
-                    .setContentTypeValue(RawToDtoContentType(section.getContentType()).getNumber())
-                    .setContent(section.getContent())
-                    .build();
+        BlogSection section = this.repository.save(sectionDto);
+        com.samithiwat.post.grpc.dto.BlogPostSection result = BlogPostSection.newBuilder()
+                .setId(Math.toIntExact(section.getId()))
+                .setPos(section.getPos())
+                .setContentTypeValue(RawToDtoContentType(section.getContentType()).getNumber())
+                .setContent(section.getContent())
+                .build();
 
-            res.setStatusCode(HttpStatus.CREATED.value())
-                    .setData(result);
+        res.setStatusCode(HttpStatus.CREATED.value())
+                .setData(result);
 
-            responseObserver.onNext(res.build());
-            responseObserver.onCompleted();
-        }catch(DataIntegrityViolationException err){
-            res.setStatusCode(HttpStatus.UNPROCESSABLE_ENTITY.value())
-                    .addErrors("Duplicated slug");
-
-            responseObserver.onNext(res.build());
-            responseObserver.onCompleted();
-        }
-
+        responseObserver.onNext(res.build());
+        responseObserver.onCompleted();
     }
 
     @Override
