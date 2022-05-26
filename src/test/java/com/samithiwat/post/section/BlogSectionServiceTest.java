@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -219,6 +220,61 @@ public class BlogSectionServiceTest {
         StreamRecorder<BlogPostSectionStatusResponse> res = StreamRecorder.create();
 
         service.update(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
+            Assertions.fail();
+        }
+
+        List<BlogPostSectionStatusResponse> results = res.getValues();
+
+        Assertions.assertEquals(1, results.size());
+
+        BlogPostSectionStatusResponse result = results.get(0);
+
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), result.getStatusCode());
+        Assertions.assertEquals(1, result.getErrorsCount());
+        Assertions.assertFalse(result.getData());
+    }
+
+    @Test
+    public void testDeleteSuccess() throws Exception{
+        Mockito.doNothing().when(this.repository).deleteById(1l);
+
+        DeletePostSectionRequest req = DeletePostSectionRequest.newBuilder()
+                .setId(1)
+                .build();
+
+        StreamRecorder<BlogPostSectionStatusResponse> res = StreamRecorder.create();
+
+        service.delete(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
+            Assertions.fail();
+        }
+
+        List<BlogPostSectionStatusResponse> results = res.getValues();
+
+        Assertions.assertEquals(1, results.size());
+
+        BlogPostSectionStatusResponse result = results.get(0);
+
+        Assertions.assertEquals(HttpStatus.OK.value(), result.getStatusCode());
+        Assertions.assertEquals(0, result.getErrorsCount());
+        Assertions.assertTrue(result.getData());
+    }
+
+    @Test
+    public void testDeleteNotFound() throws Exception {
+        Mockito.doThrow(new EmptyResultDataAccessException("Not found section", 1)).when(this.repository).deleteById(1l);
+
+
+        DeletePostSectionRequest req = DeletePostSectionRequest.newBuilder()
+                .setId(1)
+                .build();
+
+        StreamRecorder<BlogPostSectionStatusResponse> res = StreamRecorder.create();
+
+        service.delete(req, res);
 
         if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
             Assertions.fail();

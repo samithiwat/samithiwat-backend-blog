@@ -7,6 +7,7 @@ import com.samithiwat.post.grpc.dto.PostContentType;
 import com.samithiwat.post.section.entity.BlogSection;
 import io.grpc.stub.StreamObserver;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 
 public class BlogSectionServiceImpl extends BlogPostSectionServiceGrpc.BlogPostSectionServiceImplBase {
@@ -96,20 +97,32 @@ public class BlogSectionServiceImpl extends BlogPostSectionServiceGrpc.BlogPostS
 
     @Override
     public void delete(DeletePostSectionRequest request, StreamObserver<BlogPostSectionStatusResponse> responseObserver) {
-        super.delete(request, responseObserver);
+        BlogPostSectionStatusResponse.Builder res = BlogPostSectionStatusResponse.newBuilder();
+
+        try{
+            this.repository.deleteById((long) request.getId());
+            res.setStatusCode(HttpStatus.OK.value())
+                    .setData(true);
+
+            responseObserver.onNext(res.build());
+            responseObserver.onCompleted();
+        }catch(EmptyResultDataAccessException err){
+            res.setStatusCode(HttpStatus.NOT_FOUND.value())
+                    .addErrors("Not found user")
+                    .setData(false);
+
+            responseObserver.onNext(res.build());
+            responseObserver.onCompleted();
+        }
     }
 
     private ContentType DtoToRawContentType(PostContentType contentType){
-        switch(contentType){
-            case TEXT:
-                return ContentType.TEXT;
-            case IMAGE:
-                return ContentType.IMAGE;
-            case CODE:
-                return ContentType.CODE;
-            default:
-                return null;
-        }
+        return switch(contentType){
+            case TEXT -> ContentType.TEXT;
+            case IMAGE -> ContentType.IMAGE;
+            case CODE -> ContentType.CODE;
+            default -> null;
+        };
     }
 
     private PostContentType RawToDtoContentType(ContentType contentType){
