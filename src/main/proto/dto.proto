@@ -107,10 +107,11 @@ message Role {
 
 message BlogPost{
   uint32 id = 1;
-  string slug = 2;
-  string summary = 3;
-  bool isPublish = 4;
-  string PublishDate = 5;
+  BlogUser author = 2;
+  string slug = 3;
+  string summary = 4;
+  bool isPublish = 5;
+  string PublishDate = 6;
 }
 
 message BlogPostSection{
