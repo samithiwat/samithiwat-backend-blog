@@ -15,7 +15,11 @@ import java.time.Instant;
 public class BlogSection {
     public BlogSection() {}
 
-    public BlogSection(int order, ContentType contentType, String content){}
+    public BlogSection(int order, ContentType contentType, String content){
+        setOrder(order);
+        setContentType(contentType);
+        setContent(content);
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
