@@ -12,6 +12,7 @@ option java_outer_classname = "BlogPost";
 service BlogPostService{
   rpc findAll(FindAllPostRequest) returns (BlogPostPaginationResponse) {}
   rpc findOne(FindOnePostRequest) returns (BlogPostResponse) {}
+  rpc findBySlug(FindBySlugPostRequest) returns (BlogPostResponse) {}
   rpc create(CreatePostRequest) returns (BlogPostResponse) {}
   rpc update(UpdatePostRequest) returns (BlogPostResponse) {}
   rpc delete(DeletePostRequest) returns (BlogPostResponse) {}
@@ -51,6 +52,11 @@ message FindAllPostRequest{
 
 message FindOnePostRequest{
   uint32 id = 1;
+}
+
+// findBySlug
+message FindBySlugPostRequest{
+  string slug = 1;
 }
 
 // create
