@@ -23,8 +23,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import java.util.ArrayList;
-
 @SpringBootTest(properties = {
         "grpc.server.inProcessName=test-user", // Enable inProcess server
         "grpc.server.port=-1", // Disable external server
@@ -39,7 +37,6 @@ public class BlogUserServiceTest {
 
     private BlogUser user;
     private Faker faker;
-
 
     @BeforeEach
     void setup(){
