@@ -3,9 +3,7 @@ package com.samithiwat.post.section;
 import com.github.javafaker.Faker;
 import com.samithiwat.post.TestConfig;
 import com.samithiwat.post.common.ContentType;
-import com.samithiwat.post.grpc.blogsection.BlogPostSectionResponse;
-import com.samithiwat.post.grpc.blogsection.CreatePostSectionRequest;
-import com.samithiwat.post.grpc.blogsection.FindOnePostSectionRequest;
+import com.samithiwat.post.grpc.blogsection.*;
 import com.samithiwat.post.grpc.dto.BlogPostSection;
 import com.samithiwat.post.grpc.dto.PostContentType;
 import com.samithiwat.post.section.entity.BlogSection;
@@ -18,7 +16,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -178,4 +175,64 @@ public class BlogSectionServiceTest {
         Assertions.assertEquals(0, result.getErrorsCount());
         Assertions.assertEquals(this.sectionDto, result.getData());
     }
+
+    @Test
+    public void testUpdateSuccess() throws Exception{
+        Mockito.doReturn(true).when(this.repository).update(1, this.sectionDto.getPos(), this.sectionDto.getContent());
+
+        UpdatePostSectionRequest req = UpdatePostSectionRequest.newBuilder()
+                .setId(1)
+                .setPos(this.sectionDto.getPos())
+                .setContent(this.sectionDto.getContent())
+                .build();
+
+        StreamRecorder<BlogPostSectionStatusResponse> res = StreamRecorder.create();
+
+        service.update(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
+            Assertions.fail();
+        }
+
+        List<BlogPostSectionStatusResponse> results = res.getValues();
+
+        Assertions.assertEquals(1, results.size());
+
+        BlogPostSectionStatusResponse result = results.get(0);
+
+        Assertions.assertEquals(HttpStatus.OK.value(), result.getStatusCode());
+        Assertions.assertEquals(0, result.getErrorsCount());
+        Assertions.assertTrue(result.getData());
+    }
+
+    @Test
+    public void testUpdateNotFound() throws Exception {
+        Mockito.doReturn(false).when(this.repository).update(1, this.sectionDto.getPos(), this.sectionDto.getContent());
+
+
+        UpdatePostSectionRequest req = UpdatePostSectionRequest.newBuilder()
+                .setId(1)
+                .setPos(this.sectionDto.getPos())
+                .setContent(this.sectionDto.getContent())
+                .build();
+
+        StreamRecorder<BlogPostSectionStatusResponse> res = StreamRecorder.create();
+
+        service.update(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
+            Assertions.fail();
+        }
+
+        List<BlogPostSectionStatusResponse> results = res.getValues();
+
+        Assertions.assertEquals(1, results.size());
+
+        BlogPostSectionStatusResponse result = results.get(0);
+
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), result.getStatusCode());
+        Assertions.assertEquals(1, result.getErrorsCount());
+        Assertions.assertFalse(result.getData());
+    }
+
 }

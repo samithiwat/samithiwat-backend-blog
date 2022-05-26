@@ -7,7 +7,6 @@ import com.samithiwat.post.grpc.dto.PostContentType;
 import com.samithiwat.post.section.entity.BlogSection;
 import io.grpc.stub.StreamObserver;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 
 public class BlogSectionServiceImpl extends BlogPostSectionServiceGrpc.BlogPostSectionServiceImplBase {
@@ -70,12 +69,33 @@ public class BlogSectionServiceImpl extends BlogPostSectionServiceGrpc.BlogPostS
     }
 
     @Override
-    public void update(UpdatePostSectionRequest request, StreamObserver<BlogPostSectionResponse> responseObserver) {
-        super.update(request, responseObserver);
+    public void update(UpdatePostSectionRequest request, StreamObserver<BlogPostSectionStatusResponse> responseObserver) {
+        BlogPostSectionStatusResponse.Builder res = BlogPostSectionStatusResponse.newBuilder();
+
+        // TODO: Implement relationship with post
+
+        boolean isUpdated = this.repository.update(request.getId(), request.getPos(), request.getContent());
+
+        if(!isUpdated) {
+
+            res.setStatusCode(HttpStatus.NOT_FOUND.value())
+                    .addErrors("Not found section")
+                    .setData(false);
+
+            responseObserver.onNext(res.build());
+            responseObserver.onCompleted();
+            return;
+        }
+
+        res.setStatusCode(HttpStatus.OK.value())
+                .setData(true);
+
+        responseObserver.onNext(res.build());
+        responseObserver.onCompleted();
     }
 
     @Override
-    public void delete(DeletePostSectionRequest request, StreamObserver<BlogPostSectionResponse> responseObserver) {
+    public void delete(DeletePostSectionRequest request, StreamObserver<BlogPostSectionStatusResponse> responseObserver) {
         super.delete(request, responseObserver);
     }
 
