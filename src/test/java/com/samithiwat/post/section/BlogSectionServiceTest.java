@@ -4,14 +4,21 @@ import com.github.javafaker.Faker;
 import com.samithiwat.post.TestConfig;
 import com.samithiwat.post.bloguser.BlogUserServiceImpl;
 import com.samithiwat.post.common.ContentType;
+import com.samithiwat.post.grpc.blogsection.BlogPostSectionResponse;
+import com.samithiwat.post.grpc.blogsection.FindOnePostSectionRequest;
 import com.samithiwat.post.grpc.dto.BlogPostSection;
 import com.samithiwat.post.grpc.dto.BlogUser;
 import com.samithiwat.post.grpc.dto.PostContentType;
 import com.samithiwat.post.section.entity.BlogSection;
+import io.grpc.internal.testing.StreamRecorder;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -30,9 +37,6 @@ import java.util.concurrent.TimeUnit;
 @DirtiesContext
 @ExtendWith(SpringExtension.class)
 public class BlogSectionServiceTest {
-    @Spy
-    private BlogUserServiceImpl blogUserService;
-
     @Spy
     private BlogSectionRepository repository;
 
@@ -86,4 +90,63 @@ public class BlogSectionServiceTest {
         this.sectionDtos.add(sectionDto2);
         this.sectionDtos.add(sectionDto3);
     }
+
+    @Test
+    public void testFindOneSuccess() throws Exception{
+        Mockito.doReturn(this.section).when(this.repository).findById(1l);
+
+        BlogSectionServiceImpl service = new BlogSectionServiceImpl(this.repository);
+
+        FindOnePostSectionRequest req = FindOnePostSectionRequest.newBuilder()
+                .setId(1)
+                .build();
+
+        StreamRecorder<BlogPostSectionResponse> res = StreamRecorder.create();
+
+        service.findOne(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
+            Assertions.fail();
+        }
+
+        List<BlogPostSectionResponse> results = res.getValues();
+
+        Assertions.assertEquals(1, results.size());
+
+        BlogPostSectionResponse result = results.get(0);
+
+        Assertions.assertEquals(HttpStatus.OK.value(), result.getStatusCode());
+        Assertions.assertEquals(0, result.getErrorsCount());
+        Assertions.assertEquals(this.sectionDto, result.getData());
+    }
+
+    @Test
+    public void testFindOneNotFound() throws Exception {
+        Mockito.doReturn(Optional.empty()).when(this.repository).findById(1l);
+
+        BlogSectionServiceImpl service = new BlogSectionServiceImpl(this.repository);
+
+        FindOnePostSectionRequest req = FindOnePostSectionRequest.newBuilder()
+                .setId(1)
+                .build();
+
+        StreamRecorder<BlogPostSectionResponse> res = StreamRecorder.create();
+
+        service.findOne(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
+            Assertions.fail();
+        }
+
+        List<BlogPostSectionResponse> results = res.getValues();
+
+        Assertions.assertEquals(1, results.size());
+
+        BlogPostSectionResponse result = results.get(0);
+
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), result.getStatusCode());
+        Assertions.assertEquals(1, result.getErrorsCount());
+        Assertions.assertEquals(BlogPostSection.newBuilder().build(), result.getData());
+    }
+
 }
