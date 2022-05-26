@@ -10,6 +10,7 @@ import javax.persistence.*;
 import java.time.Instant;
 
 @Entity
+@Table(name="section")
 @SQLDelete(sql = "UPDATE user SET deletedDate = CURRENT_DATE WHERE id = ?")
 @Where(clause = "deletedDate IS NULL")
 public class BlogSection {
