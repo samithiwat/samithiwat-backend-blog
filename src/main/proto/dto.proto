@@ -4,7 +4,7 @@ package dto;
 
 option go_package = "github.com/samithiwat/samithiwat-backend-user/src/proto";
 option java_multiple_files = true;
-option java_package = "com.samithiwat.user.grpc.dto";
+option java_package = "com.samithiwat.post.grpc.dto";
 option java_outer_classname = "Dto";
 
 enum LogType{
