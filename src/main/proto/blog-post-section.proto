@@ -9,10 +9,10 @@ option java_package = "com.samithiwat.post.grpc.blogsection";
 option java_outer_classname = "BlogPostSection";
 
 service BlogPostSectionService{
-  rpc findOne(FindOnePostRequest) returns (BlogPostSectionResponse) {}
-  rpc create(CreatePostRequest) returns (BlogPostSectionResponse) {}
-  rpc update(UpdatePostRequest) returns (BlogPostSectionResponse) {}
-  rpc delete(DeletePostRequest) returns (BlogPostSectionResponse) {}
+  rpc findOne(FindOnePostSectionRequest) returns (BlogPostSectionResponse) {}
+  rpc create(CreatePostSectionRequest) returns (BlogPostSectionResponse) {}
+  rpc update(UpdatePostSectionRequest) returns (BlogPostSectionResponse) {}
+  rpc delete(DeletePostSectionRequest) returns (BlogPostSectionResponse) {}
 }
 
 message BlogPostSectionResponse {
@@ -23,13 +23,13 @@ message BlogPostSectionResponse {
 
 // findOne
 
-message FindOnePostRequest{
+message FindOnePostSectionRequest{
   uint32 id = 1;
 }
 
 // create
 
-message CreatePostRequest{
+message CreatePostSectionRequest{
   uint32 postId = 1;
   uint32 order = 2;
   dto.PostContentType contentType = 3;
@@ -38,7 +38,7 @@ message CreatePostRequest{
 
 // update
 
-message UpdatePostRequest{
+message UpdatePostSectionRequest{
   uint32 id = 1;
   uint32 order = 2;
   string content = 3;
@@ -46,6 +46,6 @@ message UpdatePostRequest{
 
 // delete
 
-message DeletePostRequest{
+message DeletePostSectionRequest{
   uint32 id = 1;
 }
