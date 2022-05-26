@@ -11,14 +11,20 @@ option java_outer_classname = "BlogPostSection";
 service BlogPostSectionService{
   rpc findOne(FindOnePostSectionRequest) returns (BlogPostSectionResponse) {}
   rpc create(CreatePostSectionRequest) returns (BlogPostSectionResponse) {}
-  rpc update(UpdatePostSectionRequest) returns (BlogPostSectionResponse) {}
-  rpc delete(DeletePostSectionRequest) returns (BlogPostSectionResponse) {}
+  rpc update(UpdatePostSectionRequest) returns (BlogPostSectionStatusResponse) {}
+  rpc delete(DeletePostSectionRequest) returns (BlogPostSectionStatusResponse) {}
 }
 
 message BlogPostSectionResponse {
   int32 StatusCode = 1;
   repeated string errors = 2;
   dto.BlogPostSection data = 3;
+}
+
+message BlogPostSectionStatusResponse {
+  int32 StatusCode = 1;
+  repeated string errors = 2;
+  bool data = 3;
 }
 
 // findOne
