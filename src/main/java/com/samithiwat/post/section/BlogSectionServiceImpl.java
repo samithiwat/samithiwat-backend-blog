@@ -7,17 +7,12 @@ import com.samithiwat.post.grpc.dto.PostContentType;
 import com.samithiwat.post.section.entity.BlogSection;
 import io.grpc.stub.StreamObserver;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 
 public class BlogSectionServiceImpl extends BlogPostSectionServiceGrpc.BlogPostSectionServiceImplBase {
     @Autowired
     BlogSectionRepository repository;
-
-    public BlogSectionServiceImpl(){}
-
-    public BlogSectionServiceImpl(BlogSectionRepository repository){
-        this.repository = repository;
-    }
 
     @Override
     public void findOne(FindOnePostSectionRequest request, StreamObserver<BlogPostSectionResponse> responseObserver) {
@@ -36,7 +31,7 @@ public class BlogSectionServiceImpl extends BlogPostSectionServiceGrpc.BlogPostS
         com.samithiwat.post.grpc.dto.BlogPostSection result = BlogPostSection.newBuilder()
                 .setId(Math.toIntExact(section.getId()))
                 .setOrder(section.getOrder())
-                .setContentTypeValue(RawToDtoContentType(section.getContentType()))
+                .setContentTypeValue(RawToDtoContentType(section.getContentType()).getNumber())
                 .setContent(section.getContent())
                 .build();
 
@@ -49,7 +44,38 @@ public class BlogSectionServiceImpl extends BlogPostSectionServiceGrpc.BlogPostS
 
     @Override
     public void create(CreatePostSectionRequest request, StreamObserver<BlogPostSectionResponse> responseObserver) {
-        super.create(request, responseObserver);
+        BlogPostSectionResponse.Builder res = BlogPostSectionResponse.newBuilder();
+
+        // TODO: Implement relationship with post
+
+        BlogSection sectionDto = new BlogSection(
+                request.getOrder(),
+                DtoToRawContentType(request.getContentType()),
+                request.getContent()
+        );
+
+        try{
+            BlogSection section = this.repository.save(sectionDto);
+            com.samithiwat.post.grpc.dto.BlogPostSection result = BlogPostSection.newBuilder()
+                    .setId(Math.toIntExact(section.getId()))
+                    .setOrder(section.getOrder())
+                    .setContentTypeValue(RawToDtoContentType(section.getContentType()).getNumber())
+                    .setContent(section.getContent())
+                    .build();
+
+            res.setStatusCode(HttpStatus.CREATED.value())
+                    .setData(result);
+
+            responseObserver.onNext(res.build());
+            responseObserver.onCompleted();
+        }catch(DataIntegrityViolationException err){
+            res.setStatusCode(HttpStatus.UNPROCESSABLE_ENTITY.value())
+                    .addErrors("Duplicated slug");
+
+            responseObserver.onNext(res.build());
+            responseObserver.onCompleted();
+        }
+
     }
 
     @Override
@@ -62,25 +88,25 @@ public class BlogSectionServiceImpl extends BlogPostSectionServiceGrpc.BlogPostS
         super.delete(request, responseObserver);
     }
 
-    private String DtoToRawContentType(int contentType){
+    private ContentType DtoToRawContentType(PostContentType contentType){
         switch(contentType){
-            case PostContentType.TEXT_VALUE:
-                return ContentType.TEXT.toString();
-            case PostContentType.IMAGE_VALUE:
-                return ContentType.IMAGE.toString();
-            case PostContentType.CODE_VALUE:
-                return ContentType.CODE.toString();
+            case TEXT:
+                return ContentType.TEXT;
+            case IMAGE:
+                return ContentType.IMAGE;
+            case CODE:
+                return ContentType.CODE;
             default:
                 return null;
         }
     }
 
-    private int RawToDtoContentType(ContentType contentType){
+    private PostContentType RawToDtoContentType(ContentType contentType){
        return switch (contentType){
-           case TEXT -> PostContentType.TEXT_VALUE;
-           case IMAGE -> PostContentType.IMAGE_VALUE;
-           case CODE -> PostContentType.CODE_VALUE;
-           default -> -1;
+           case TEXT -> PostContentType.TEXT;
+           case IMAGE -> PostContentType.IMAGE;
+           case CODE -> PostContentType.CODE;
+           default -> null;
         };
     }
 }
