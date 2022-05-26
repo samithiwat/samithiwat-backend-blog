@@ -7,7 +7,6 @@ import com.samithiwat.post.grpc.bloguser.BlogUserResponse;
 import com.samithiwat.post.grpc.bloguser.BlogUserServiceGrpc;
 import com.samithiwat.post.grpc.bloguser.FindOneUserRequest;
 import com.samithiwat.post.grpc.dto.BlogUser;
-import com.samithiwat.post.grpc.dto.User;
 import io.grpc.ManagedChannel;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
