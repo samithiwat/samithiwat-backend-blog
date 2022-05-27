@@ -115,7 +115,7 @@ public class BlogSectionServiceImpl extends BlogPostSectionServiceGrpc.BlogPostS
             responseObserver.onCompleted();
         }catch(EmptyResultDataAccessException err){
             res.setStatusCode(HttpStatus.NOT_FOUND.value())
-                    .addErrors("Not found user")
+                    .addErrors("Not found section")
                     .setData(false);
 
             responseObserver.onNext(res.build());
