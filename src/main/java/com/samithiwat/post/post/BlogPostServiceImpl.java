@@ -3,11 +3,13 @@ package com.samithiwat.post.post;
 import com.samithiwat.post.bloguser.BlogUserServiceImpl;
 import com.samithiwat.post.grpc.blogpost.*;
 import com.samithiwat.post.grpc.dto.BlogUser;
-import com.samithiwat.post.grpc.dto.User;
 import com.samithiwat.post.post.entity.BlogPost;
 import io.grpc.stub.StreamObserver;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+
+import java.time.Instant;
 
 public class BlogPostServiceImpl extends BlogPostServiceGrpc.BlogPostServiceImplBase {
     @Autowired
@@ -77,7 +79,45 @@ public class BlogPostServiceImpl extends BlogPostServiceGrpc.BlogPostServiceImpl
 
     @Override
     public void create(CreatePostRequest request, StreamObserver<BlogPostResponse> responseObserver) {
-        super.create(request, responseObserver);
+        BlogPostResponse.Builder res = BlogPostResponse.newBuilder();
+
+        BlogUser userDto = this.userService.findOne((long) request.getAuthorId());
+
+        if (userDto == null){
+            res.setStatusCode(HttpStatus.NOT_FOUND.value())
+                    .addErrors("Not found user");
+
+            responseObserver.onNext(res.build());
+            responseObserver.onCompleted();
+            return;
+        }
+
+        com.samithiwat.post.bloguser.entity.BlogUser user = this.userService.findOneEntityByUserId((long) userDto.getId());
+        BlogPost post = new BlogPost(user, request.getSlug(), request.getSummary(), request.getIsPublish(), Instant.parse(request.getPublishDate()));
+
+        try{
+            post = this.repository.save(post);
+            com.samithiwat.post.grpc.dto.BlogPost result = com.samithiwat.post.grpc.dto.BlogPost.newBuilder()
+                    .setId(Math.toIntExact(post.getId()))
+                    .setAuthor(userDto)
+                    .setSlug(post.getSlug())
+                    .setSummary(post.getSummary())
+                    .setIsPublish(post.getPublished())
+                    .setPublishDate(post.getPublishDate().toString())
+                    .build();
+
+            res.setStatusCode(HttpStatus.CREATED.value())
+                    .setData(result);
+
+            responseObserver.onNext(res.build());
+            responseObserver.onCompleted();
+        }catch (DataIntegrityViolationException err){
+            res.setStatusCode(HttpStatus.UNPROCESSABLE_ENTITY.value())
+                    .addErrors("Duplicated slug");
+
+            responseObserver.onNext(res.build());
+            responseObserver.onCompleted();
+        }
     }
 
     @Override

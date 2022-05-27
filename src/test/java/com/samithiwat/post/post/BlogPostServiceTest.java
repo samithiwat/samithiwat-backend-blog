@@ -4,6 +4,7 @@ import com.github.javafaker.Faker;
 import com.samithiwat.post.TestConfig;
 import com.samithiwat.post.bloguser.BlogUserServiceImpl;
 import com.samithiwat.post.grpc.blogpost.BlogPostResponse;
+import com.samithiwat.post.grpc.blogpost.CreatePostRequest;
 import com.samithiwat.post.grpc.blogpost.FindOnePostRequest;
 import com.samithiwat.post.grpc.dto.BlogPost;
 import com.samithiwat.post.grpc.dto.BlogUser;
@@ -12,9 +13,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -41,22 +44,26 @@ public class BlogPostServiceTest {
     @Spy
     private BlogPostRepository repository;
 
+    @InjectMocks
+    private BlogPostServiceImpl service;
+
     private List<BlogPost> postDtos;
     private BlogPost postDto;
     private List<com.samithiwat.post.post.entity.BlogPost> posts;
     private Optional<com.samithiwat.post.post.entity.BlogPost> post;
-    private BlogUser user;
+    private BlogUser userDto;
+    private com.samithiwat.post.bloguser.entity.BlogUser user;
     private Faker faker;
 
     @BeforeEach
     void setup(){
         this.faker = new Faker();
 
-        com.samithiwat.post.bloguser.entity.BlogUser user = new com.samithiwat.post.bloguser.entity.BlogUser();
+        this.user = new com.samithiwat.post.bloguser.entity.BlogUser();
         user.setId(1l);
         user.setUserId(1l);
 
-        this.user = BlogUser.newBuilder()
+        this.userDto = BlogUser.newBuilder()
                 .setId(1)
                 .setFirstname(faker.name().firstName())
                 .setLastname(faker.name().lastName())
@@ -97,7 +104,7 @@ public class BlogPostServiceTest {
         this.postDtos = new ArrayList<BlogPost>();
         this.postDto = BlogPost.newBuilder()
                 .setId(1)
-                .setAuthor(this.user)
+                .setAuthor(this.userDto)
                 .setSlug(post.get().getSlug())
                 .setSummary(post.get().getSummary())
                 .setIsPublish(post.get().getPublished())
@@ -106,7 +113,7 @@ public class BlogPostServiceTest {
 
         BlogPost postDto2 = BlogPost.newBuilder()
                 .setId(2)
-                .setAuthor(this.user)
+                .setAuthor(this.userDto)
                 .setSlug(post2.getSlug())
                 .setSummary(post2.getSummary())
                 .setIsPublish(post2.getPublished())
@@ -115,7 +122,7 @@ public class BlogPostServiceTest {
 
         BlogPost postDto3 = BlogPost.newBuilder()
                 .setId(3)
-                .setAuthor(this.user)
+                .setAuthor(this.userDto)
                 .setSlug(post3.getSlug())
                 .setSummary(post3.getSummary())
                 .setIsPublish(post3.getPublished())
@@ -130,9 +137,7 @@ public class BlogPostServiceTest {
     @Test
     public void testFindOneSuccess() throws Exception{
         Mockito.doReturn(this.post).when(this.repository).findById(1l);
-        Mockito.doReturn(this.user).when(this.blogUserService).findOne(1l);
-
-        BlogPostServiceImpl service = new BlogPostServiceImpl(this.repository, this.blogUserService);
+        Mockito.doReturn(this.userDto).when(this.blogUserService).findOne(1l);
 
         FindOnePostRequest req = FindOnePostRequest.newBuilder()
                 .setId(1)
@@ -160,9 +165,7 @@ public class BlogPostServiceTest {
     @Test
     public void testFindOneNotFoundPost() throws Exception {
         Mockito.doReturn(Optional.empty()).when(this.repository).findById(1l);
-        Mockito.doReturn(this.user).when(this.blogUserService).findOne(1l);
-
-        BlogPostServiceImpl service = new BlogPostServiceImpl(this.repository, this.blogUserService);
+        Mockito.doReturn(this.userDto).when(this.blogUserService).findOne(1l);
 
         FindOnePostRequest req = FindOnePostRequest.newBuilder()
                 .setId(1)
@@ -192,8 +195,6 @@ public class BlogPostServiceTest {
         Mockito.doReturn(this.post).when(this.repository).findById(1l);
         Mockito.doReturn(null).when(this.blogUserService).findOne(1l);
 
-        BlogPostServiceImpl service = new BlogPostServiceImpl(this.repository, this.blogUserService);
-
         FindOnePostRequest req = FindOnePostRequest.newBuilder()
                 .setId(1)
                 .build();
@@ -217,4 +218,102 @@ public class BlogPostServiceTest {
         Assertions.assertEquals(BlogPost.newBuilder().build(), result.getData());
     }
 
+    @Test
+    public void testCreateSuccess() throws Exception{
+        Mockito.doReturn(this.userDto).when(this.blogUserService).findOne(1l);
+        Mockito.doReturn(this.user).when(this.blogUserService).findOneEntityByUserId(1l);
+        Mockito.doReturn(this.post.get()).when(this.repository).save(Mockito.any());
+
+        CreatePostRequest req = CreatePostRequest.newBuilder()
+                .setAuthorId(this.postDto.getAuthor().getId())
+                .setSlug(this.postDto.getSlug())
+                .setSummary(this.postDto.getSummary())
+                .setIsPublish(this.postDto.getIsPublish())
+                .setPublishDate(this.postDto.getPublishDate())
+                .build();
+
+        StreamRecorder<BlogPostResponse> res = StreamRecorder.create();
+
+        service.create(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
+            Assertions.fail();
+        }
+
+        List<BlogPostResponse> results = res.getValues();
+
+        Assertions.assertEquals(1, results.size());
+
+        BlogPostResponse result = results.get(0);
+
+        Assertions.assertEquals(HttpStatus.CREATED.value(), result.getStatusCode());
+        Assertions.assertEquals(0, result.getErrorsCount());
+        Assertions.assertEquals(this.postDto, result.getData());
+    }
+
+    @Test
+    public void testCreateNotFoundUser() throws Exception{
+        Mockito.doReturn(null).when(this.blogUserService).findOne(1l);
+        Mockito.doReturn(this.user).when(this.blogUserService).findOneEntityByUserId(1l);
+        Mockito.doReturn(this.post).when(this.repository).save(Mockito.any());
+
+        CreatePostRequest req = CreatePostRequest.newBuilder()
+                .setAuthorId(this.postDto.getAuthor().getId())
+                .setSlug(this.postDto.getSlug())
+                .setSummary(this.postDto.getSummary())
+                .setIsPublish(this.postDto.getIsPublish())
+                .setPublishDate(this.postDto.getPublishDate())
+                .build();
+
+        StreamRecorder<BlogPostResponse> res = StreamRecorder.create();
+
+        service.create(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
+            Assertions.fail();
+        }
+
+        List<BlogPostResponse> results = res.getValues();
+
+        Assertions.assertEquals(1, results.size());
+
+        BlogPostResponse result = results.get(0);
+
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), result.getStatusCode());
+        Assertions.assertEquals(1, result.getErrorsCount());
+        Assertions.assertEquals(BlogPost.newBuilder().build(), result.getData());
+    }
+
+    @Test
+    public void testCreateDuplicatedSlug() throws Exception{
+        Mockito.doReturn(this.userDto).when(this.blogUserService).findOne(1l);
+        Mockito.doReturn(this.user).when(this.blogUserService).findOneEntityByUserId(1l);
+        Mockito.doThrow(new DataIntegrityViolationException("Duplicated slug")).when(this.repository).save(Mockito.any());
+
+        CreatePostRequest req = CreatePostRequest.newBuilder()
+                .setAuthorId(this.postDto.getAuthor().getId())
+                .setSlug(this.postDto.getSlug())
+                .setSummary(this.postDto.getSummary())
+                .setIsPublish(this.postDto.getIsPublish())
+                .setPublishDate(this.postDto.getPublishDate())
+                .build();
+
+        StreamRecorder<BlogPostResponse> res = StreamRecorder.create();
+
+        service.create(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
+            Assertions.fail();
+        }
+
+        List<BlogPostResponse> results = res.getValues();
+
+        Assertions.assertEquals(1, results.size());
+
+        BlogPostResponse result = results.get(0);
+
+        Assertions.assertEquals(HttpStatus.UNPROCESSABLE_ENTITY.value(), result.getStatusCode());
+        Assertions.assertEquals(1, result.getErrorsCount());
+        Assertions.assertEquals(BlogPost.newBuilder().build(), result.getData());
+    }
 }
