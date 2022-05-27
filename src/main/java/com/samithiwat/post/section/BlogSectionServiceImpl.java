@@ -1,5 +1,6 @@
 package com.samithiwat.post.section;
 
+import com.samithiwat.post.bloguser.BlogUserServiceImpl;
 import com.samithiwat.post.common.ContentType;
 import com.samithiwat.post.grpc.blogsection.*;
 import com.samithiwat.post.grpc.dto.BlogPostSection;
@@ -13,6 +14,12 @@ import org.springframework.http.HttpStatus;
 public class BlogSectionServiceImpl extends BlogPostSectionServiceGrpc.BlogPostSectionServiceImplBase {
     @Autowired
     BlogSectionRepository repository;
+
+    public BlogSectionServiceImpl() {}
+
+    public BlogSectionServiceImpl(BlogSectionRepository repository) {
+        this.repository = repository;
+    }
 
     @Override
     public void findOne(FindOnePostSectionRequest request, StreamObserver<BlogPostSectionResponse> responseObserver) {
