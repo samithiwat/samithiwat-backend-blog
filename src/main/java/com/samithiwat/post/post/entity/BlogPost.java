@@ -1,6 +1,7 @@
 package com.samithiwat.post.post.entity;
 
 import com.samithiwat.post.bloguser.entity.BlogUser;
+import com.samithiwat.post.section.entity.BlogSection;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -8,6 +9,7 @@ import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.util.List;
 
 @Entity
 @Table(name = "post", indexes = @Index(columnList = "slug"))
@@ -31,6 +33,9 @@ public class BlogPost {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private BlogUser author;
+
+    @OneToMany(mappedBy = "post")
+    private List<BlogSection> sections;
 
     @Column(unique = true)
     private String slug;
@@ -67,6 +72,14 @@ public class BlogPost {
 
     public void setAuthor(BlogUser author) {
         this.author = author;
+    }
+
+    public List<BlogSection> getSections() {
+        return sections;
+    }
+
+    public void setSections(List<BlogSection> sections) {
+        this.sections = sections;
     }
 
     public String getSlug() {

@@ -1,6 +1,7 @@
 package com.samithiwat.post.section.entity;
 
 import com.samithiwat.post.common.ContentType;
+import com.samithiwat.post.post.entity.BlogPost;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -25,6 +26,10 @@ public class BlogSection {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
+    @ManyToOne
+    @JoinTable(name = "post_id")
+    private BlogPost post;
 
     @Column
     private int pos;
@@ -51,6 +56,14 @@ public class BlogSection {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public BlogPost getPost() {
+        return post;
+    }
+
+    public void setPost(BlogPost post) {
+        this.post = post;
     }
 
     public int getPos() {
