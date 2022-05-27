@@ -17,11 +17,15 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+
+import java.util.Optional;
 
 @SpringBootTest(properties = {
         "grpc.server.inProcessName=test-user", // Enable inProcess server
@@ -35,14 +39,20 @@ public class BlogUserServiceTest {
     @Rule
     public final GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
 
-    private BlogUser user;
+    @Spy
+    private BlogUserRepository repository;
+
+    private BlogUser userDto;
+    private Optional<com.samithiwat.post.bloguser.entity.BlogUser> user;
     private Faker faker;
 
     @BeforeEach
     void setup(){
         this.faker = new Faker();
 
-        this.user = BlogUser.newBuilder()
+        this.user = Optional.of(new com.samithiwat.post.bloguser.entity.BlogUser(1l));
+
+        this.userDto = BlogUser.newBuilder()
                 .setId(1)
                 .setFirstname(faker.name().firstName())
                 .setLastname(faker.name().lastName())
@@ -57,7 +67,7 @@ public class BlogUserServiceTest {
             public void findOne(FindOneUserRequest request, StreamObserver<BlogUserResponse> responseObserver) {
                 BlogUserResponse res = BlogUserResponse.newBuilder()
                         .setStatusCode(HttpStatus.OK.value())
-                        .setData(user)
+                        .setData(userDto)
                         .build();
 
                 responseObserver.onNext(res);
@@ -76,7 +86,7 @@ public class BlogUserServiceTest {
         BlogUserServiceGrpc.BlogUserServiceBlockingStub userBlockingStub = BlogUserServiceGrpc.newBlockingStub(chan);
         BlogUserServiceImpl service = new BlogUserServiceImpl(userBlockingStub);
 
-        Assertions.assertEquals(this.user, service.findOne(1l));
+        Assertions.assertEquals(this.userDto, service.findOne(1l));
     }
 
     @Test
@@ -106,5 +116,23 @@ public class BlogUserServiceTest {
         BlogUserServiceImpl service = new BlogUserServiceImpl(userBlockingStub);
 
         Assertions.assertNull(service.findOne(1l));
+    }
+
+    @Test
+    public void testFindOneEntityByUserIdSuccess(){
+        Mockito.doReturn(this.user).when(this.repository).findByUserId(1l);
+
+        BlogUserServiceImpl service = new BlogUserServiceImpl(this.repository);
+
+        Assertions.assertEquals(this.user.get(), service.findOneEntityByUserId(1l));
+    }
+
+    @Test
+    public void testFindOneEntityByUserIdNotFound(){
+        Mockito.doReturn(Optional.empty()).when(this.repository).findByUserId(1l);
+
+        BlogUserServiceImpl service = new BlogUserServiceImpl(this.repository);
+
+        Assertions.assertNull(service.findOneEntityByUserId(1l));
     }
 }

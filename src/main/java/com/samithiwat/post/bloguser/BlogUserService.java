@@ -4,4 +4,5 @@ import com.samithiwat.post.grpc.dto.BlogUser;
 
 public interface BlogUserService {
     BlogUser findOne(Long id);
+    com.samithiwat.post.bloguser.entity.BlogUser findOneEntityByUserId(Long id);
 }

@@ -1,6 +1,5 @@
-package com.samithiwat.post.section.entity;
+package com.samithiwat.post.bloguser.entity;
 
-import com.samithiwat.post.common.ContentType;
 import com.samithiwat.post.post.entity.BlogPost;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
@@ -9,37 +8,28 @@ import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.util.List;
 
 @Entity
-@Table(name="section")
+@Table(name = "user")
 @SQLDelete(sql = "UPDATE user SET deletedDate = CURRENT_DATE WHERE id = ?")
 @Where(clause = "deletedDate IS NULL")
-public class BlogSection {
-    public BlogSection() {}
+public class BlogUser {
+    public BlogUser() {}
 
-    public BlogSection(int pos, ContentType contentType, String content){
-        setPos(pos);
-        setContentType(contentType);
-        setContent(content);
+    public BlogUser(Long userId) {
+        this.userId = userId;
     }
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "post_id")
-    private BlogPost post;
+    @Column(unique = true)
+    private Long userId;
 
-    @Column
-    private int pos;
-
-    @Enumerated(EnumType.ORDINAL)
-    private ContentType contentType;
-
-    @Lob
-    @Column
-    private String content;
+    @OneToMany(mappedBy = "author")
+    private List<BlogPost> posts;
 
     @CreationTimestamp
     private Instant createdDate;
@@ -58,36 +48,20 @@ public class BlogSection {
         this.id = id;
     }
 
-    public BlogPost getPost() {
-        return post;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setPost(BlogPost post) {
-        this.post = post;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
-    public int getPos() {
-        return pos;
+    public List<BlogPost> getPosts() {
+        return posts;
     }
 
-    public void setPos(int pos) {
-        this.pos = pos;
-    }
-
-    public ContentType getContentType() {
-        return contentType;
-    }
-
-    public void setContentType(ContentType contentType) {
-        this.contentType = contentType;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
+    public void setPosts(List<BlogPost> posts) {
+        this.posts = posts;
     }
 
     public Instant getCreatedDate() {
