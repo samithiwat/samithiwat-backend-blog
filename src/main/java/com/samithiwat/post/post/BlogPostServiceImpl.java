@@ -121,12 +121,40 @@ public class BlogPostServiceImpl extends BlogPostServiceGrpc.BlogPostServiceImpl
     }
 
     @Override
-    public void update(UpdatePostRequest request, StreamObserver<BlogPostResponse> responseObserver) {
-        super.update(request, responseObserver);
+    public void update(UpdatePostRequest request, StreamObserver<BlogPostStatusResponse> responseObserver) {
+        BlogPostStatusResponse.Builder res = BlogPostStatusResponse.newBuilder();
+
+        try{
+            boolean isUpdate = this.repository.update(request.getId(), request.getSlug(), request.getSummary(), request.getIsPublish(), Instant.parse(request.getPublishDate()));
+            if(!isUpdate){
+                res.setStatusCode(HttpStatus.NOT_FOUND.value())
+                        .addErrors("Not found post")
+                        .setData(false);
+
+                responseObserver.onNext(res.build());
+                responseObserver.onCompleted();
+                return;
+            }
+
+            res.setStatusCode(HttpStatus.OK.value())
+                    .setData(true);
+
+            responseObserver.onNext(res.build());
+            responseObserver.onCompleted();
+        }catch(DataIntegrityViolationException err){
+            res.setStatusCode(HttpStatus.UNPROCESSABLE_ENTITY.value())
+                    .addErrors("Duplicated slug")
+                    .setData(false);
+
+            responseObserver.onNext(res.build());
+            responseObserver.onCompleted();
+        }
+
+
     }
 
     @Override
-    public void delete(DeletePostRequest request, StreamObserver<BlogPostResponse> responseObserver) {
+    public void delete(DeletePostRequest request, StreamObserver<BlogPostStatusResponse> responseObserver) {
         super.delete(request, responseObserver);
     }
 }

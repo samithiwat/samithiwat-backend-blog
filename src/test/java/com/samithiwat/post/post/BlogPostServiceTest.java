@@ -3,9 +3,7 @@ package com.samithiwat.post.post;
 import com.github.javafaker.Faker;
 import com.samithiwat.post.TestConfig;
 import com.samithiwat.post.bloguser.BlogUserServiceImpl;
-import com.samithiwat.post.grpc.blogpost.BlogPostResponse;
-import com.samithiwat.post.grpc.blogpost.CreatePostRequest;
-import com.samithiwat.post.grpc.blogpost.FindOnePostRequest;
+import com.samithiwat.post.grpc.blogpost.*;
 import com.samithiwat.post.grpc.dto.BlogPost;
 import com.samithiwat.post.grpc.dto.BlogUser;
 import io.grpc.internal.testing.StreamRecorder;
@@ -23,6 +21,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -315,5 +314,98 @@ public class BlogPostServiceTest {
         Assertions.assertEquals(HttpStatus.UNPROCESSABLE_ENTITY.value(), result.getStatusCode());
         Assertions.assertEquals(1, result.getErrorsCount());
         Assertions.assertEquals(BlogPost.newBuilder().build(), result.getData());
+    }
+
+    @Test
+    public void testUpdateSuccess() throws Exception {
+        Mockito.doReturn(true).when(this.repository).update(1, this.postDto.getSlug(), this.postDto.getSummary(), this.postDto.getIsPublish(), Instant.parse(this.postDto.getPublishDate()));
+
+        UpdatePostRequest req = UpdatePostRequest.newBuilder()
+                .setId(1)
+                .setSlug(this.postDto.getSlug())
+                .setSummary(this.postDto.getSummary())
+                .setIsPublish(this.postDto.getIsPublish())
+                .setPublishDate(this.postDto.getPublishDate())
+                .build();
+
+        StreamRecorder<BlogPostStatusResponse> res = StreamRecorder.create();
+
+        service.update(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
+            Assertions.fail();
+        }
+
+        List<BlogPostStatusResponse> results = res.getValues();
+
+        Assertions.assertEquals(1, results.size());
+
+        BlogPostStatusResponse result = results.get(0);
+
+        Assertions.assertEquals(HttpStatus.OK.value(), result.getStatusCode());
+        Assertions.assertEquals(0, result.getErrorsCount());
+        Assertions.assertTrue(result.getData());
+    }
+
+    @Test
+    public void testUpdateNotFoundPost() throws Exception {
+        Mockito.doReturn(false).when(this.repository).update(1, this.postDto.getSlug(), this.postDto.getSummary(), this.postDto.getIsPublish(), Instant.parse(this.postDto.getPublishDate()));
+
+        UpdatePostRequest req = UpdatePostRequest.newBuilder()
+                .setId(1)
+                .setSlug(this.postDto.getSlug())
+                .setSummary(this.postDto.getSummary())
+                .setIsPublish(this.postDto.getIsPublish())
+                .setPublishDate(this.postDto.getPublishDate())
+                .build();
+
+        StreamRecorder<BlogPostStatusResponse> res = StreamRecorder.create();
+
+        service.update(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
+            Assertions.fail();
+        }
+
+        List<BlogPostStatusResponse> results = res.getValues();
+
+        Assertions.assertEquals(1, results.size());
+
+        BlogPostStatusResponse result = results.get(0);
+
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), result.getStatusCode());
+        Assertions.assertEquals(1, result.getErrorsCount());
+        Assertions.assertFalse(result.getData());
+    }
+
+    @Test
+    public void testUpdateDuplicatedSlug() throws Exception{
+        Mockito.doThrow(new DataIntegrityViolationException("Duplicated slug")).when(this.repository).update(1, this.postDto.getSlug(), this.postDto.getSummary(), this.postDto.getIsPublish(), Instant.parse(this.postDto.getPublishDate()));
+
+        UpdatePostRequest req = UpdatePostRequest.newBuilder()
+                .setId(1)
+                .setSlug(this.postDto.getSlug())
+                .setSummary(this.postDto.getSummary())
+                .setIsPublish(this.postDto.getIsPublish())
+                .setPublishDate(this.postDto.getPublishDate())
+                .build();
+
+        StreamRecorder<BlogPostStatusResponse> res = StreamRecorder.create();
+
+        service.update(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
+            Assertions.fail();
+        }
+
+        List<BlogPostStatusResponse> results = res.getValues();
+
+        Assertions.assertEquals(1, results.size());
+
+        BlogPostStatusResponse result = results.get(0);
+
+        Assertions.assertEquals(HttpStatus.UNPROCESSABLE_ENTITY.value(), result.getStatusCode());
+        Assertions.assertEquals(1, result.getErrorsCount());
+        Assertions.assertFalse(result.getData());
     }
 }
