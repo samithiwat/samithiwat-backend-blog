@@ -15,6 +15,12 @@ import java.util.List;
 @SQLDelete(sql = "UPDATE user SET deletedDate = CURRENT_DATE WHERE id = ?")
 @Where(clause = "deletedDate IS NULL")
 public class BlogUser {
+    public BlogUser() {}
+
+    public BlogUser(Long userId) {
+        this.userId = userId;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
