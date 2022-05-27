@@ -218,6 +218,90 @@ public class BlogPostServiceTest {
     }
 
     @Test
+    public void testFindBySlug() throws Exception{
+        Mockito.doReturn(this.post).when(this.repository).findBySlug(this.postDto.getSlug());
+        Mockito.doReturn(this.userDto).when(this.blogUserService).findOne(1l);
+
+        FindBySlugPostRequest req = FindBySlugPostRequest.newBuilder()
+                .setSlug(this.postDto.getSlug())
+                .build();
+
+        StreamRecorder<BlogPostResponse> res = StreamRecorder.create();
+
+        service.findBySlug(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
+            Assertions.fail();
+        }
+
+        List<BlogPostResponse> results = res.getValues();
+
+        Assertions.assertEquals(1, results.size());
+
+        BlogPostResponse result = results.get(0);
+
+        Assertions.assertEquals(HttpStatus.OK.value(), result.getStatusCode());
+        Assertions.assertEquals(0, result.getErrorsCount());
+        Assertions.assertEquals(this.postDto, result.getData());
+    }
+
+    @Test
+    public void testFindBySlugNotFoundPost() throws Exception {
+        Mockito.doReturn(Optional.empty()).when(this.repository).findBySlug(this.postDto.getSlug());
+        Mockito.doReturn(this.userDto).when(this.blogUserService).findOne(1l);
+
+        FindBySlugPostRequest req = FindBySlugPostRequest.newBuilder()
+                .setSlug(this.postDto.getSlug())
+                .build();
+
+        StreamRecorder<BlogPostResponse> res = StreamRecorder.create();
+
+        service.findBySlug(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
+            Assertions.fail();
+        }
+
+        List<BlogPostResponse> results = res.getValues();
+
+        Assertions.assertEquals(1, results.size());
+
+        BlogPostResponse result = results.get(0);
+
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), result.getStatusCode());
+        Assertions.assertEquals(1, result.getErrorsCount());
+        Assertions.assertEquals(BlogPost.newBuilder().build(), result.getData());
+    }
+
+    @Test
+    public void testFindBySlugNotFoundUser() throws Exception {
+        Mockito.doReturn(Optional.empty()).when(this.repository).findBySlug(this.postDto.getSlug());
+        Mockito.doReturn(null).when(this.blogUserService).findOne(1l);
+
+        FindBySlugPostRequest req = FindBySlugPostRequest.newBuilder()
+                .setSlug(this.postDto.getSlug())
+                .build();
+
+        StreamRecorder<BlogPostResponse> res = StreamRecorder.create();
+
+        service.findBySlug(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
+            Assertions.fail();
+        }
+
+        List<BlogPostResponse> results = res.getValues();
+
+        Assertions.assertEquals(1, results.size());
+
+        BlogPostResponse result = results.get(0);
+
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), result.getStatusCode());
+        Assertions.assertEquals(1, result.getErrorsCount());
+        Assertions.assertEquals(BlogPost.newBuilder().build(), result.getData());
+    }
+
+    @Test
     public void testCreateSuccess() throws Exception{
         Mockito.doReturn(this.userDto).when(this.blogUserService).findOne(1l);
         Mockito.doReturn(this.user).when(this.blogUserService).findOneEntityByUserId(1l);

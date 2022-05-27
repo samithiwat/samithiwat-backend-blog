@@ -36,7 +36,7 @@ public class BlogPostServiceImpl extends BlogPostServiceGrpc.BlogPostServiceImpl
 
         BlogPost post = this.repository.findById((long) request.getId()).orElse(null);
 
-        if(post == null){
+        if (post == null){
             res.setStatusCode(HttpStatus.NOT_FOUND.value())
                     .addErrors("Not found post");
 
@@ -74,7 +74,44 @@ public class BlogPostServiceImpl extends BlogPostServiceGrpc.BlogPostServiceImpl
 
     @Override
     public void findBySlug(FindBySlugPostRequest request, StreamObserver<BlogPostResponse> responseObserver) {
-        super.findBySlug(request, responseObserver);
+        BlogPostResponse.Builder res = BlogPostResponse.newBuilder();
+
+        BlogPost post = this.repository.findBySlug(request.getSlug()).orElse(null);
+
+        if (post == null){
+            res.setStatusCode(HttpStatus.NOT_FOUND.value())
+                    .addErrors("Not found post");
+
+            responseObserver.onNext(res.build());
+            responseObserver.onCompleted();
+            return;
+        }
+
+        BlogUser user = this.userService.findOne(post.getAuthor().getId());
+
+        if (user == null){
+            res.setStatusCode(HttpStatus.NOT_FOUND.value())
+                    .addErrors("Not found user");
+
+            responseObserver.onNext(res.build());
+            responseObserver.onCompleted();
+            return;
+        }
+
+        com.samithiwat.post.grpc.dto.BlogPost result = com.samithiwat.post.grpc.dto.BlogPost.newBuilder()
+                .setId(Math.toIntExact(post.getId()))
+                .setAuthor(user)
+                .setSlug(post.getSlug())
+                .setSummary(post.getSummary())
+                .setIsPublish(post.getPublished())
+                .setPublishDate(post.getPublishDate().toString())
+                .build();
+
+        res.setStatusCode(HttpStatus.OK.value())
+                .setData(result);
+
+        responseObserver.onNext(res.build());
+        responseObserver.onCompleted();
     }
 
     @Override
