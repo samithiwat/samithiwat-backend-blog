@@ -2,12 +2,15 @@ package com.samithiwat.post.post;
 
 import com.samithiwat.post.bloguser.BlogUserServiceImpl;
 import com.samithiwat.post.grpc.blogpost.*;
+import com.samithiwat.post.grpc.common.PaginationMetadata;
 import com.samithiwat.post.grpc.dto.BlogUser;
 import com.samithiwat.post.post.entity.BlogPost;
 import io.grpc.stub.StreamObserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 
 import java.time.Instant;
@@ -28,7 +31,55 @@ public class BlogPostServiceImpl extends BlogPostServiceGrpc.BlogPostServiceImpl
 
     @Override
     public void findAll(FindAllPostRequest request, StreamObserver<BlogPostPaginationResponse> responseObserver) {
-        super.findAll(request, responseObserver);
+        int limit = Math.toIntExact(request.getLimit()), page = Math.toIntExact(request.getPage());
+
+        if(limit < 5 ){
+            limit = 5;
+        }
+
+        if(limit > 20){
+            limit = 20;
+        }
+
+        if(page < 1){
+            page = 1;
+        }
+
+        BlogPostPaginationResponse.Builder res = BlogPostPaginationResponse.newBuilder();
+
+        Page<BlogPost> blogPostPage = this.repository.findAll(PageRequest.of(page - 1, limit));
+
+        PaginationMetadata metadata = PaginationMetadata.newBuilder()
+                .setTotalItem(blogPostPage.getTotalElements())
+                .setItemCount(blogPostPage.getNumberOfElements())
+                .setItemsPerPage(blogPostPage.getSize())
+                .setTotalPage(blogPostPage.getTotalPages())
+                .setCurrentPage(blogPostPage.getNumber() + 1)
+                .build();
+
+        BlogPostPagination.Builder result = BlogPostPagination.newBuilder()
+                .setMeta(metadata);
+
+        for(BlogPost post: blogPostPage.getContent()) {
+            BlogUser userDto = this.userService.findOne(post.getAuthor().getUserId());
+
+            com.samithiwat.post.grpc.dto.BlogPost dto = com.samithiwat.post.grpc.dto.BlogPost.newBuilder()
+                    .setId(Math.toIntExact(post.getId()))
+                    .setAuthor(userDto)
+                    .setSlug(post.getSlug())
+                    .setSummary(post.getSummary())
+                    .setIsPublish(post.getPublished())
+                    .setPublishDate(post.getPublishDate().toString())
+                    .build();
+
+            result.addItems(dto);
+        }
+
+        res.setStatusCode(HttpStatus.OK.value())
+                .setData(result.build());
+
+        responseObserver.onNext(res.build());
+        responseObserver.onCompleted();
     }
 
     @Override
@@ -46,7 +97,7 @@ public class BlogPostServiceImpl extends BlogPostServiceGrpc.BlogPostServiceImpl
             return;
         }
 
-        BlogUser user = this.userService.findOne(post.getAuthor().getId());
+        BlogUser user = this.userService.findOne(post.getAuthor().getUserId());
 
         if (user == null){
             res.setStatusCode(HttpStatus.NOT_FOUND.value())
@@ -88,7 +139,7 @@ public class BlogPostServiceImpl extends BlogPostServiceGrpc.BlogPostServiceImpl
             return;
         }
 
-        BlogUser user = this.userService.findOne(post.getAuthor().getId());
+        BlogUser user = this.userService.findOne(post.getAuthor().getUserId());
 
         if (user == null){
             res.setStatusCode(HttpStatus.NOT_FOUND.value())

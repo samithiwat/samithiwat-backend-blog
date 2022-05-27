@@ -4,6 +4,7 @@ import com.github.javafaker.Faker;
 import com.samithiwat.post.TestConfig;
 import com.samithiwat.post.bloguser.BlogUserServiceImpl;
 import com.samithiwat.post.grpc.blogpost.*;
+import com.samithiwat.post.grpc.common.PaginationMetadata;
 import com.samithiwat.post.grpc.dto.BlogPost;
 import com.samithiwat.post.grpc.dto.BlogUser;
 import io.grpc.internal.testing.StreamRecorder;
@@ -17,16 +18,20 @@ import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
+
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 @SpringBootTest(properties = {
         "grpc.server.inProcessName=test-user", // Enable inProcess server
@@ -53,11 +58,10 @@ public class BlogPostServiceTest {
     private Optional<com.samithiwat.post.post.entity.BlogPost> post;
     private BlogUser userDto;
     private com.samithiwat.post.bloguser.entity.BlogUser user;
-    private Faker faker;
 
     @BeforeEach
     void setup(){
-        this.faker = new Faker();
+        Faker faker = new Faker();
 
         this.user = new com.samithiwat.post.bloguser.entity.BlogUser();
         user.setId(1l);
@@ -132,6 +136,132 @@ public class BlogPostServiceTest {
         this.postDtos.add(this.postDto);
         this.postDtos.add(postDto2);
         this.postDtos.add(postDto3);
+    }
+
+    @Test
+    public void testFindAllWithPagination() throws Exception{
+        Page<com.samithiwat.post.post.entity.BlogPost> postPagination = new Page<com.samithiwat.post.post.entity.BlogPost>() {
+            @Override
+            public int getTotalPages() {
+                return 2;
+            }
+
+            @Override
+            public long getTotalElements() {
+                return 15;
+            }
+
+            @Override
+            public <U> Page<U> map(Function<? super com.samithiwat.post.post.entity.BlogPost, ? extends U> converter) {
+                return null;
+            }
+
+            @Override
+            public int getNumber() {
+                return 1;
+            }
+
+            @Override
+            public int getSize() {
+                return 5;
+            }
+
+            @Override
+            public int getNumberOfElements() {
+                return 10;
+            }
+
+            @Override
+            public List<com.samithiwat.post.post.entity.BlogPost> getContent() {
+                return posts;
+            }
+
+            @Override
+            public boolean hasContent() {
+                return false;
+            }
+
+            @Override
+            public Sort getSort() {
+                return null;
+            }
+
+            @Override
+            public boolean isFirst() {
+                return false;
+            }
+
+            @Override
+            public boolean isLast() {
+                return false;
+            }
+
+            @Override
+            public boolean hasNext() {
+                return false;
+            }
+
+            @Override
+            public boolean hasPrevious() {
+                return false;
+            }
+
+            @Override
+            public Pageable nextPageable() {
+                return null;
+            }
+
+            @Override
+            public Pageable previousPageable() {
+                return null;
+            }
+
+            @Override
+            public Iterator<com.samithiwat.post.post.entity.BlogPost> iterator() {
+                return null;
+            }
+        };
+
+        PaginationMetadata metadata = PaginationMetadata.newBuilder()
+                .setTotalItem(postPagination.getTotalElements())
+                .setItemCount(postPagination.getNumberOfElements())
+                .setItemsPerPage(postPagination.getSize())
+                .setTotalPage(postPagination.getTotalPages())
+                .setCurrentPage(postPagination.getNumber() + 1)
+                .build();
+
+        BlogPostPagination want = BlogPostPagination.newBuilder()
+                .addItems(0, this.postDtos.get(0))
+                .addItems(1, this.postDtos.get(1))
+                .addItems(2, this.postDtos.get(2))
+                .setMeta(metadata)
+                .build();
+
+        Mockito.doReturn(postPagination).when(this.repository).findAll(PageRequest.of(0, 10));
+        Mockito.doReturn(this.userDto).when(this.blogUserService).findOne(1l);
+
+        FindAllPostRequest req = FindAllPostRequest.newBuilder()
+                .setLimit(10l)
+                .setPage(1l)
+                .build();
+
+        StreamRecorder<BlogPostPaginationResponse> res = StreamRecorder.create();
+
+        service.findAll(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
+            Assertions.fail();
+        }
+
+        List<BlogPostPaginationResponse> results = res.getValues();
+
+        Assertions.assertEquals(1, results.size());
+
+        BlogPostPaginationResponse result = results.get(0);
+
+        Assertions.assertEquals(HttpStatus.OK.value(), result.getStatusCode());
+        Assertions.assertEquals(0, result.getErrorsCount());
+        Assertions.assertEquals(want, result.getData());
     }
 
     @Test
