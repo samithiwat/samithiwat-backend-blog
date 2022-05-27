@@ -66,6 +66,7 @@ message CreatePostRequest{
   string summary = 2;
   bool isPublish = 3;
   string PublishDate = 4;
+  uint32 authorId = 5;
 }
 
 // update
