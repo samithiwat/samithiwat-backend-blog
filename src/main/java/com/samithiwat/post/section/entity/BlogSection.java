@@ -28,7 +28,7 @@ public class BlogSection {
     private Long id;
 
     @ManyToOne
-    @JoinTable(name = "post_id")
+    @JoinColumn(name = "post_id")
     private BlogPost post;
 
     @Column
