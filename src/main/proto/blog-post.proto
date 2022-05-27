@@ -14,14 +14,20 @@ service BlogPostService{
   rpc findOne(FindOnePostRequest) returns (BlogPostResponse) {}
   rpc findBySlug(FindBySlugPostRequest) returns (BlogPostResponse) {}
   rpc create(CreatePostRequest) returns (BlogPostResponse) {}
-  rpc update(UpdatePostRequest) returns (BlogPostResponse) {}
-  rpc delete(DeletePostRequest) returns (BlogPostResponse) {}
+  rpc update(UpdatePostRequest) returns (BlogPostStatusResponse) {}
+  rpc delete(DeletePostRequest) returns (BlogPostStatusResponse) {}
 }
 
 message BlogPostResponse {
   int32 StatusCode = 1;
   repeated string errors = 2;
   dto.BlogPost data = 3;
+}
+
+message BlogPostStatusResponse {
+  int32 StatusCode = 1;
+  repeated string errors = 2;
+  bool data = 3;
 }
 
 message BlogPostListResponse {
