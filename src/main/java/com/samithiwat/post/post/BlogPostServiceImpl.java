@@ -7,6 +7,7 @@ import com.samithiwat.post.post.entity.BlogPost;
 import io.grpc.stub.StreamObserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 
 import java.time.Instant;
@@ -192,6 +193,22 @@ public class BlogPostServiceImpl extends BlogPostServiceGrpc.BlogPostServiceImpl
 
     @Override
     public void delete(DeletePostRequest request, StreamObserver<BlogPostStatusResponse> responseObserver) {
-        super.delete(request, responseObserver);
+        BlogPostStatusResponse.Builder res = BlogPostStatusResponse.newBuilder();
+
+        try{
+            this.repository.deleteById((long) request.getId());
+            res.setStatusCode(HttpStatus.OK.value())
+                    .setData(true);
+
+            responseObserver.onNext(res.build());
+            responseObserver.onCompleted();
+        }catch(EmptyResultDataAccessException err){
+            res.setStatusCode(HttpStatus.NOT_FOUND.value())
+                    .addErrors("Not found post")
+                    .setData(false);
+
+            responseObserver.onNext(res.build());
+            responseObserver.onCompleted();
+        }
     }
 }

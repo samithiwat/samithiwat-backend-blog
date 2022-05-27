@@ -16,6 +16,7 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -489,6 +490,60 @@ public class BlogPostServiceTest {
         BlogPostStatusResponse result = results.get(0);
 
         Assertions.assertEquals(HttpStatus.UNPROCESSABLE_ENTITY.value(), result.getStatusCode());
+        Assertions.assertEquals(1, result.getErrorsCount());
+        Assertions.assertFalse(result.getData());
+    }
+
+    @Test
+    public void testDeleteSuccess() throws Exception {
+        Mockito.doNothing().when(this.repository).deleteById(1l);
+
+        DeletePostRequest req = DeletePostRequest.newBuilder()
+                .setId(1)
+                .build();
+
+        StreamRecorder<BlogPostStatusResponse> res = StreamRecorder.create();
+
+        service.delete(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
+            Assertions.fail();
+        }
+
+        List<BlogPostStatusResponse> results = res.getValues();
+
+        Assertions.assertEquals(1, results.size());
+
+        BlogPostStatusResponse result = results.get(0);
+
+        Assertions.assertEquals(HttpStatus.OK.value(), result.getStatusCode());
+        Assertions.assertEquals(0, result.getErrorsCount());
+        Assertions.assertTrue(result.getData());
+    }
+
+    @Test
+    public void testDeleteNotFoundPost() throws Exception {
+        Mockito.doThrow(new EmptyResultDataAccessException("Not found post", 1)).when(this.repository).deleteById(1l);
+
+        DeletePostRequest req = DeletePostRequest.newBuilder()
+                .setId(1)
+                .build();
+
+        StreamRecorder<BlogPostStatusResponse> res = StreamRecorder.create();
+
+        service.delete(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
+            Assertions.fail();
+        }
+
+        List<BlogPostStatusResponse> results = res.getValues();
+
+        Assertions.assertEquals(1, results.size());
+
+        BlogPostStatusResponse result = results.get(0);
+
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), result.getStatusCode());
         Assertions.assertEquals(1, result.getErrorsCount());
         Assertions.assertFalse(result.getData());
     }
