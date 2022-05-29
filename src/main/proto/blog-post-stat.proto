@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package blog_post_stat;
+
+import "dto.proto";
+
+option java_multiple_files = true;
+option java_package = "com.samithiwat.post.grpc.blogstat";
+option java_outer_classname = "BlogPostStat";
+
+service BlogPostStatService{
+  rpc findOne(FindOneBlogPostStatRequest) returns (BlogPostStatResponse) {}
+  rpc create(CreateBlogPostStatRequest) returns (BlogPostStatResponse) {}
+  rpc update(UpdateBlogPostStatRequest) returns (BlogPostStatStatusResponse) {}
+  rpc delete(DeleteBlogPostStatRequest) returns (BlogPostStatStatusResponse) {}
+}
+
+message BlogPostStatResponse {
+  int32 StatusCode = 1;
+  repeated string errors = 2;
+  dto.BlogPostStat data = 3;
+}
+
+message BlogPostStatStatusResponse {
+  int32 StatusCode = 1;
+  repeated string errors = 2;
+  bool data = 3;
+}
+
+// findOne
+
+message FindOneBlogPostStatRequest{
+  uint32 id = 1;
+}
+
+// create
+
+message CreateBlogPostStatRequest{
+  uint32 postId = 1;
+}
+
+// update
+
+message UpdateBlogPostStatRequest{
+  uint32 id = 1;
+  uint32 likes = 2;
+  uint32 views = 3;
+  uint32 shares = 4;
+}
+
+// delete
+
+message DeleteBlogPostStatRequest{
+  uint32 id = 1;
+}
