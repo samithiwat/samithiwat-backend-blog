@@ -6,6 +6,7 @@ import com.samithiwat.post.common.ContentType;
 import com.samithiwat.post.grpc.blogsection.*;
 import com.samithiwat.post.grpc.dto.BlogPostSection;
 import com.samithiwat.post.grpc.dto.PostContentType;
+import com.samithiwat.post.post.entity.BlogPost;
 import com.samithiwat.post.section.entity.BlogSection;
 import io.grpc.internal.testing.StreamRecorder;
 import org.junit.jupiter.api.Assertions;
@@ -42,31 +43,22 @@ public class BlogSectionServiceTest {
     @InjectMocks
     private BlogSectionServiceImpl service;
 
-    private List<BlogPostSection> sectionDtos;
     private BlogPostSection sectionDto;
-    private List<BlogSection> sections;
     private Optional<BlogSection> section;
-    private Faker faker;
 
     @BeforeEach
     void setup(){
-        this.faker = new Faker();
+        Faker faker = new Faker();
 
-        this.sections = new ArrayList<>();
-        this.section = Optional.of(new BlogSection(1, ContentType.IMAGE, faker.internet().image()));
-        this.section.get().setId(1l);
+        this.section = Optional.of(new BlogSection(1, ContentType.IMAGE, faker.internet().image(), 1L));
+        this.section.get().setId(1L);
 
-        BlogSection section2 = new BlogSection(2, ContentType.TEXT, faker.lorem().paragraph());
-        section2.setId(2l);
+        BlogSection section2 = new BlogSection(2, ContentType.TEXT, faker.lorem().paragraph(), 1L);
+        section2.setId(2L);
 
-        BlogSection section3 = new BlogSection(3, ContentType.CODE, faker.lorem().paragraph());
-        section2.setId(3l);
+        BlogSection section3 = new BlogSection(3, ContentType.CODE, faker.lorem().paragraph(), 1L);
+        section2.setId(3L);
 
-        this.sections.add(this.section.get());
-        this.sections.add(section2);
-        this.sections.add(section3);
-
-        this.sectionDtos = new ArrayList<BlogPostSection>();
         this.sectionDto = BlogPostSection.newBuilder()
                 .setId(1)
                 .setPos(this.section.get().getPos())
@@ -87,15 +79,11 @@ public class BlogSectionServiceTest {
                 .setContentType(PostContentType.CODE)
                 .setContent(section3.getContent())
                 .build();
-
-        this.sectionDtos.add(this.sectionDto);
-        this.sectionDtos.add(sectionDto2);
-        this.sectionDtos.add(sectionDto3);
     }
 
     @Test
     public void testFindOneSuccess() throws Exception{
-        Mockito.doReturn(this.section).when(this.repository).findById(1l);
+        Mockito.doReturn(this.section).when(this.repository).findById(1L);
 
         FindOnePostSectionRequest req = FindOnePostSectionRequest.newBuilder()
                 .setId(1)
@@ -122,7 +110,7 @@ public class BlogSectionServiceTest {
 
     @Test
     public void testFindOneNotFound() throws Exception {
-        Mockito.doReturn(Optional.empty()).when(this.repository).findById(1l);
+        Mockito.doReturn(Optional.empty()).when(this.repository).findById(1L);
 
         FindOnePostSectionRequest req = FindOnePostSectionRequest.newBuilder()
                 .setId(1)
@@ -238,7 +226,7 @@ public class BlogSectionServiceTest {
 
     @Test
     public void testDeleteSuccess() throws Exception{
-        Mockito.doNothing().when(this.repository).deleteById(1l);
+        Mockito.doNothing().when(this.repository).deleteById(1L);
 
         DeletePostSectionRequest req = DeletePostSectionRequest.newBuilder()
                 .setId(1)
@@ -265,7 +253,7 @@ public class BlogSectionServiceTest {
 
     @Test
     public void testDeleteNotFound() throws Exception {
-        Mockito.doThrow(new EmptyResultDataAccessException("Not found section", 1)).when(this.repository).deleteById(1l);
+        Mockito.doThrow(new EmptyResultDataAccessException("Not found section", 1)).when(this.repository).deleteById(1L);
 
 
         DeletePostSectionRequest req = DeletePostSectionRequest.newBuilder()

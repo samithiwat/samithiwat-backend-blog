@@ -17,10 +17,13 @@ import java.time.Instant;
 public class BlogSection {
     public BlogSection() {}
 
-    public BlogSection(int pos, ContentType contentType, String content){
+    public BlogSection(int pos, ContentType contentType, String content, Long postId){
+        BlogPost post = new BlogPost();
+        post.setId(postId);
         setPos(pos);
         setContentType(contentType);
         setContent(content);
+        setPost(post);
     }
 
     @Id
