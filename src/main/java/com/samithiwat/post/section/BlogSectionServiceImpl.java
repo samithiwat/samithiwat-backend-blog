@@ -58,7 +58,8 @@ public class BlogSectionServiceImpl extends BlogPostSectionServiceGrpc.BlogPostS
         BlogSection sectionDto = new BlogSection(
                 request.getPos(),
                 DtoToRawContentType(request.getContentType()),
-                request.getContent()
+                request.getContent(),
+                (long) request.getPostId()
         );
 
         BlogSection section = this.repository.save(sectionDto);
