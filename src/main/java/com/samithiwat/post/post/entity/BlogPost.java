@@ -2,6 +2,7 @@ package com.samithiwat.post.post.entity;
 
 import com.samithiwat.post.bloguser.entity.BlogUser;
 import com.samithiwat.post.section.entity.BlogSection;
+import com.samithiwat.post.stat.entity.BlogStat;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -29,6 +30,9 @@ public class BlogPost {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
+    @OneToOne(mappedBy = "post")
+    private BlogStat stat;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -64,6 +68,14 @@ public class BlogPost {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public BlogStat getStat() {
+        return stat;
+    }
+
+    public void setStat(BlogStat stat) {
+        this.stat = stat;
     }
 
     public BlogUser getAuthor() {
