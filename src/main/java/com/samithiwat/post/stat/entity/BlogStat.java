@@ -40,6 +40,23 @@ public class BlogStat {
     @Column
     private Instant deletedDate;
 
+    public BlogStat(){}
+
+    public BlogStat(Long postId){
+        BlogPost post = new BlogPost();
+        post.setId(postId);
+        setPost(post);
+    }
+
+    public BlogStat(Long likes, Long views, Long shares, Long postId){
+        BlogPost post = new BlogPost();
+        post.setId(postId);
+        setPost(post);
+        setLikes(likes);
+        setShares(shares);
+        setViews(views);
+    }
+
     public Long getId() {
         return id;
     }
