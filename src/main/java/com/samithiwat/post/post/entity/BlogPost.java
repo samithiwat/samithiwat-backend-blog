@@ -31,7 +31,7 @@ public class BlogPost {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @OneToOne(mappedBy = "post")
+    @OneToOne(mappedBy = "post", cascade = CascadeType.REMOVE)
     private BlogStat stat;
 
     @ManyToOne
