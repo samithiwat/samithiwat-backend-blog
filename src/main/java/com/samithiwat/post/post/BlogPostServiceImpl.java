@@ -5,6 +5,7 @@ import com.samithiwat.post.grpc.blogpost.*;
 import com.samithiwat.post.grpc.common.PaginationMetadata;
 import com.samithiwat.post.grpc.dto.BlogUser;
 import com.samithiwat.post.post.entity.BlogPost;
+import com.samithiwat.post.stat.BlogStatServiceImpl;
 import io.grpc.stub.StreamObserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -22,11 +23,15 @@ public class BlogPostServiceImpl extends BlogPostServiceGrpc.BlogPostServiceImpl
     @Autowired
     private BlogUserServiceImpl userService;
 
+    @Autowired
+    private BlogStatServiceImpl statService;
+
     public BlogPostServiceImpl(){}
 
-    public BlogPostServiceImpl(BlogPostRepository repository, BlogUserServiceImpl userService) {
+    public BlogPostServiceImpl(BlogPostRepository repository, BlogUserServiceImpl userService, BlogStatServiceImpl statService) {
         this.repository = repository;
         this.userService = userService;
+        this.statService = statService;
     }
 
     @Override
@@ -186,6 +191,8 @@ public class BlogPostServiceImpl extends BlogPostServiceGrpc.BlogPostServiceImpl
 
         try{
             post = this.repository.save(post);
+            this.statService.create(post.getId());
+
             com.samithiwat.post.grpc.dto.BlogPost result = com.samithiwat.post.grpc.dto.BlogPost.newBuilder()
                     .setId(Math.toIntExact(post.getId()))
                     .setAuthor(userDto)

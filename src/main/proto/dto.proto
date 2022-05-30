@@ -7,6 +7,13 @@ option java_multiple_files = true;
 option java_package = "com.samithiwat.post.grpc.dto";
 option java_outer_classname = "Dto";
 
+enum StatCountType {
+  VIEW_INCREASE = 0;
+  LIKE_INCREASE = 1;
+  LIKE_DECREASE = 2;
+  SHARE_INCREASE = 3;
+}
+
 enum LogType{
   POST = 0;
   EDIT = 1;
@@ -112,12 +119,19 @@ message BlogPost{
   string summary = 4;
   bool isPublish = 5;
   string PublishDate = 6;
+  dto.BlogPostStat stat = 7;
 }
 
 message BlogPostSection{
   uint32 id = 1;
-  uint32 postId = 2;
-  uint32 pos = 3;
-  PostContentType contentType = 4;
-  string content = 5;
+  uint32 pos = 2;
+  PostContentType contentType = 3;
+  string content = 4;
+}
+
+message BlogPostStat{
+  uint32 id = 1;
+  uint32 likes = 2;
+  uint32 views = 3;
+  uint32 shares = 4;
 }

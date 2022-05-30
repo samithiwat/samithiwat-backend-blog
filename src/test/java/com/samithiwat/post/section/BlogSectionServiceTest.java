@@ -6,7 +6,6 @@ import com.samithiwat.post.common.ContentType;
 import com.samithiwat.post.grpc.blogsection.*;
 import com.samithiwat.post.grpc.dto.BlogPostSection;
 import com.samithiwat.post.grpc.dto.PostContentType;
-import com.samithiwat.post.post.entity.BlogPost;
 import com.samithiwat.post.section.entity.BlogSection;
 import io.grpc.internal.testing.StreamRecorder;
 import org.junit.jupiter.api.Assertions;
@@ -23,7 +22,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -53,31 +51,11 @@ public class BlogSectionServiceTest {
         this.section = Optional.of(new BlogSection(1, ContentType.IMAGE, faker.internet().image(), 1L));
         this.section.get().setId(1L);
 
-        BlogSection section2 = new BlogSection(2, ContentType.TEXT, faker.lorem().paragraph(), 1L);
-        section2.setId(2L);
-
-        BlogSection section3 = new BlogSection(3, ContentType.CODE, faker.lorem().paragraph(), 1L);
-        section2.setId(3L);
-
         this.sectionDto = BlogPostSection.newBuilder()
                 .setId(1)
                 .setPos(this.section.get().getPos())
                 .setContentType(PostContentType.IMAGE)
                 .setContent(this.section.get().getContent())
-                .build();
-
-        BlogPostSection sectionDto2 = BlogPostSection.newBuilder()
-                .setId(2)
-                .setPos(section2.getPos())
-                .setContentType(PostContentType.TEXT)
-                .setContent(section2.getContent())
-                .build();
-
-        BlogPostSection sectionDto3 = BlogPostSection.newBuilder()
-                .setId(3)
-                .setPos(section3.getPos())
-                .setContentType(PostContentType.CODE)
-                .setContent(section3.getContent())
                 .build();
     }
 

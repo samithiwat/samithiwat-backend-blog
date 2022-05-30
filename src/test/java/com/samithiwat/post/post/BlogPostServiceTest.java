@@ -7,6 +7,8 @@ import com.samithiwat.post.grpc.blogpost.*;
 import com.samithiwat.post.grpc.common.PaginationMetadata;
 import com.samithiwat.post.grpc.dto.BlogPost;
 import com.samithiwat.post.grpc.dto.BlogUser;
+import com.samithiwat.post.stat.BlogStatServiceImpl;
+import com.samithiwat.post.stat.entity.BlogStat;
 import io.grpc.internal.testing.StreamRecorder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,6 +44,8 @@ import java.util.function.Function;
 @DirtiesContext
 @ExtendWith(SpringExtension.class)
 public class BlogPostServiceTest {
+    @Spy
+    private BlogStatServiceImpl blogStatService;
 
     @Spy
     private BlogUserServiceImpl blogUserService;
@@ -58,14 +62,16 @@ public class BlogPostServiceTest {
     private Optional<com.samithiwat.post.post.entity.BlogPost> post;
     private BlogUser userDto;
     private com.samithiwat.post.bloguser.entity.BlogUser user;
+    private BlogStat stat;
 
     @BeforeEach
     void setup(){
         Faker faker = new Faker();
 
+        this.stat = new BlogStat(1L);
         this.user = new com.samithiwat.post.bloguser.entity.BlogUser();
-        user.setId(1l);
-        user.setUserId(1l);
+        user.setId(1L);
+        user.setUserId(1L);
 
         this.userDto = BlogUser.newBuilder()
                 .setId(1)
@@ -82,7 +88,7 @@ public class BlogPostServiceTest {
                 true,
                 faker.date().past(1, TimeUnit.DAYS).toInstant()
         ));
-        this.post.get().setId(1l);
+        this.post.get().setId(1L);
 
         com.samithiwat.post.post.entity.BlogPost post2 = new com.samithiwat.post.post.entity.BlogPost(
                 user,
@@ -91,7 +97,7 @@ public class BlogPostServiceTest {
                 true,
                 faker.date().past(1, TimeUnit.DAYS).toInstant()
         );
-        post2.setId(2l);
+        post2.setId(2L);
 
         com.samithiwat.post.post.entity.BlogPost post3 = new com.samithiwat.post.post.entity.BlogPost(
                 user,
@@ -100,7 +106,7 @@ public class BlogPostServiceTest {
                 true,
                 faker.date().past(1, TimeUnit.DAYS).toInstant()
         );
-        post3.setId(3l);
+        post3.setId(3L);
         this.posts.add(this.post.get());
         this.posts.add(post2);
         this.posts.add(post3);
@@ -238,11 +244,11 @@ public class BlogPostServiceTest {
                 .build();
 
         Mockito.doReturn(postPagination).when(this.repository).findAll(PageRequest.of(0, 10));
-        Mockito.doReturn(this.userDto).when(this.blogUserService).findOne(1l);
+        Mockito.doReturn(this.userDto).when(this.blogUserService).findOne(1L);
 
         FindAllPostRequest req = FindAllPostRequest.newBuilder()
                 .setLimit(10l)
-                .setPage(1l)
+                .setPage(1L)
                 .build();
 
         StreamRecorder<BlogPostPaginationResponse> res = StreamRecorder.create();
@@ -266,8 +272,8 @@ public class BlogPostServiceTest {
 
     @Test
     public void testFindOneSuccess() throws Exception{
-        Mockito.doReturn(this.post).when(this.repository).findById(1l);
-        Mockito.doReturn(this.userDto).when(this.blogUserService).findOne(1l);
+        Mockito.doReturn(this.post).when(this.repository).findById(1L);
+        Mockito.doReturn(this.userDto).when(this.blogUserService).findOne(1L);
 
         FindOnePostRequest req = FindOnePostRequest.newBuilder()
                 .setId(1)
@@ -294,8 +300,8 @@ public class BlogPostServiceTest {
 
     @Test
     public void testFindOneNotFoundPost() throws Exception {
-        Mockito.doReturn(Optional.empty()).when(this.repository).findById(1l);
-        Mockito.doReturn(this.userDto).when(this.blogUserService).findOne(1l);
+        Mockito.doReturn(Optional.empty()).when(this.repository).findById(1L);
+        Mockito.doReturn(this.userDto).when(this.blogUserService).findOne(1L);
 
         FindOnePostRequest req = FindOnePostRequest.newBuilder()
                 .setId(1)
@@ -322,8 +328,8 @@ public class BlogPostServiceTest {
 
     @Test
     public void testFindOneNotFoundUser() throws Exception {
-        Mockito.doReturn(this.post).when(this.repository).findById(1l);
-        Mockito.doReturn(null).when(this.blogUserService).findOne(1l);
+        Mockito.doReturn(this.post).when(this.repository).findById(1L);
+        Mockito.doReturn(null).when(this.blogUserService).findOne(1L);
 
         FindOnePostRequest req = FindOnePostRequest.newBuilder()
                 .setId(1)
@@ -351,7 +357,7 @@ public class BlogPostServiceTest {
     @Test
     public void testFindBySlug() throws Exception{
         Mockito.doReturn(this.post).when(this.repository).findBySlug(this.postDto.getSlug());
-        Mockito.doReturn(this.userDto).when(this.blogUserService).findOne(1l);
+        Mockito.doReturn(this.userDto).when(this.blogUserService).findOne(1L);
 
         FindBySlugPostRequest req = FindBySlugPostRequest.newBuilder()
                 .setSlug(this.postDto.getSlug())
@@ -379,7 +385,7 @@ public class BlogPostServiceTest {
     @Test
     public void testFindBySlugNotFoundPost() throws Exception {
         Mockito.doReturn(Optional.empty()).when(this.repository).findBySlug(this.postDto.getSlug());
-        Mockito.doReturn(this.userDto).when(this.blogUserService).findOne(1l);
+        Mockito.doReturn(this.userDto).when(this.blogUserService).findOne(1L);
 
         FindBySlugPostRequest req = FindBySlugPostRequest.newBuilder()
                 .setSlug(this.postDto.getSlug())
@@ -407,7 +413,7 @@ public class BlogPostServiceTest {
     @Test
     public void testFindBySlugNotFoundUser() throws Exception {
         Mockito.doReturn(Optional.empty()).when(this.repository).findBySlug(this.postDto.getSlug());
-        Mockito.doReturn(null).when(this.blogUserService).findOne(1l);
+        Mockito.doReturn(null).when(this.blogUserService).findOne(1L);
 
         FindBySlugPostRequest req = FindBySlugPostRequest.newBuilder()
                 .setSlug(this.postDto.getSlug())
@@ -434,8 +440,9 @@ public class BlogPostServiceTest {
 
     @Test
     public void testCreateSuccess() throws Exception{
-        Mockito.doReturn(this.userDto).when(this.blogUserService).findOne(1l);
-        Mockito.doReturn(this.user).when(this.blogUserService).findOneEntityByUserId(1l);
+        Mockito.doReturn(this.stat).when(this.blogStatService).create(1L);
+        Mockito.doReturn(this.userDto).when(this.blogUserService).findOne(1L);
+        Mockito.doReturn(this.user).when(this.blogUserService).findOneEntityByUserId(1L);
         Mockito.doReturn(this.post.get()).when(this.repository).save(Mockito.any());
 
         CreatePostRequest req = CreatePostRequest.newBuilder()
@@ -463,12 +470,15 @@ public class BlogPostServiceTest {
         Assertions.assertEquals(HttpStatus.CREATED.value(), result.getStatusCode());
         Assertions.assertEquals(0, result.getErrorsCount());
         Assertions.assertEquals(this.postDto, result.getData());
+
+        Mockito.verify(this.blogStatService, Mockito.times(1)).create(1L);
     }
 
     @Test
     public void testCreateNotFoundUser() throws Exception{
-        Mockito.doReturn(null).when(this.blogUserService).findOne(1l);
-        Mockito.doReturn(this.user).when(this.blogUserService).findOneEntityByUserId(1l);
+        Mockito.doReturn(this.stat).when(this.blogStatService).create(1L);
+        Mockito.doReturn(null).when(this.blogUserService).findOne(1L);
+        Mockito.doReturn(this.user).when(this.blogUserService).findOneEntityByUserId(1L);
         Mockito.doReturn(this.post).when(this.repository).save(Mockito.any());
 
         CreatePostRequest req = CreatePostRequest.newBuilder()
@@ -496,12 +506,15 @@ public class BlogPostServiceTest {
         Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), result.getStatusCode());
         Assertions.assertEquals(1, result.getErrorsCount());
         Assertions.assertEquals(BlogPost.newBuilder().build(), result.getData());
+
+        Mockito.verify(this.blogStatService, Mockito.times(0)).create(1L);
     }
 
     @Test
     public void testCreateDuplicatedSlug() throws Exception{
-        Mockito.doReturn(this.userDto).when(this.blogUserService).findOne(1l);
-        Mockito.doReturn(this.user).when(this.blogUserService).findOneEntityByUserId(1l);
+        Mockito.doReturn(this.stat).when(this.blogStatService).create(1L);
+        Mockito.doReturn(this.userDto).when(this.blogUserService).findOne(1L);
+        Mockito.doReturn(this.user).when(this.blogUserService).findOneEntityByUserId(1L);
         Mockito.doThrow(new DataIntegrityViolationException("Duplicated slug")).when(this.repository).save(Mockito.any());
 
         CreatePostRequest req = CreatePostRequest.newBuilder()
@@ -529,6 +542,7 @@ public class BlogPostServiceTest {
         Assertions.assertEquals(HttpStatus.UNPROCESSABLE_ENTITY.value(), result.getStatusCode());
         Assertions.assertEquals(1, result.getErrorsCount());
         Assertions.assertEquals(BlogPost.newBuilder().build(), result.getData());
+        Mockito.verify(this.blogStatService, Mockito.times(0)).create(1L);
     }
 
     @Test
@@ -626,7 +640,7 @@ public class BlogPostServiceTest {
 
     @Test
     public void testDeleteSuccess() throws Exception {
-        Mockito.doNothing().when(this.repository).deleteById(1l);
+        Mockito.doNothing().when(this.repository).deleteById(1L);
 
         DeletePostRequest req = DeletePostRequest.newBuilder()
                 .setId(1)
@@ -653,7 +667,7 @@ public class BlogPostServiceTest {
 
     @Test
     public void testDeleteNotFoundPost() throws Exception {
-        Mockito.doThrow(new EmptyResultDataAccessException("Not found post", 1)).when(this.repository).deleteById(1l);
+        Mockito.doThrow(new EmptyResultDataAccessException("Not found post", 1)).when(this.repository).deleteById(1L);
 
         DeletePostRequest req = DeletePostRequest.newBuilder()
                 .setId(1)
