@@ -186,7 +186,7 @@ public class BlogPostServiceImpl extends BlogPostServiceGrpc.BlogPostServiceImpl
             return;
         }
 
-        com.samithiwat.post.bloguser.entity.BlogUser user = this.userService.findOneEntityByUserId((long) userDto.getId());
+        com.samithiwat.post.bloguser.entity.BlogUser user = this.userService.findOneOrCreate((long) userDto.getId());
         BlogPost post = new BlogPost(user, request.getSlug(), request.getSummary(), request.getIsPublish(), Instant.parse(request.getPublishDate()));
 
         try{

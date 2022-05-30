@@ -52,7 +52,11 @@ public class BlogUserServiceImpl implements BlogUserService{
     }
 
     @Override
-    public com.samithiwat.post.bloguser.entity.BlogUser findOneEntityByUserId(Long id) {
-        return this.repository.findByUserId(id).orElse(null);
+    public com.samithiwat.post.bloguser.entity.BlogUser findOneOrCreate(Long userId) {
+        return this.repository.findByUserId(userId)
+                .orElseGet(() -> {
+            com.samithiwat.post.bloguser.entity.BlogUser user = new com.samithiwat.post.bloguser.entity.BlogUser(userId);
+            return this.repository.save(user);
+        });
     }
 }
