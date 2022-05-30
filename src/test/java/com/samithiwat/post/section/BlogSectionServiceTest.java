@@ -6,7 +6,6 @@ import com.samithiwat.post.common.ContentType;
 import com.samithiwat.post.grpc.blogsection.*;
 import com.samithiwat.post.grpc.dto.BlogPostSection;
 import com.samithiwat.post.grpc.dto.PostContentType;
-import com.samithiwat.post.post.entity.BlogPost;
 import com.samithiwat.post.section.entity.BlogSection;
 import io.grpc.internal.testing.StreamRecorder;
 import org.junit.jupiter.api.Assertions;
