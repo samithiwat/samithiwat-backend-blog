@@ -1,6 +1,5 @@
 package com.samithiwat.post.section;
 
-import com.samithiwat.post.bloguser.BlogUserServiceImpl;
 import com.samithiwat.post.common.ContentType;
 import com.samithiwat.post.grpc.blogsection.*;
 import com.samithiwat.post.grpc.dto.BlogPostSection;
@@ -52,8 +51,6 @@ public class BlogSectionServiceImpl extends BlogPostSectionServiceGrpc.BlogPostS
     @Override
     public void create(CreatePostSectionRequest request, StreamObserver<BlogPostSectionResponse> responseObserver) {
         BlogPostSectionResponse.Builder res = BlogPostSectionResponse.newBuilder();
-
-        // TODO: Implement relationship with post
 
         BlogSection sectionDto = new BlogSection(
                 request.getPos(),
