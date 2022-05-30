@@ -2,7 +2,6 @@ package com.samithiwat.post.stat;
 
 import com.samithiwat.post.TestConfig;
 import com.samithiwat.post.grpc.blogstat.*;
-import com.samithiwat.post.grpc.dto.BlogPostStat;
 import com.samithiwat.post.grpc.dto.StatCountType;
 import com.samithiwat.post.stat.entity.BlogStat;
 import io.grpc.internal.testing.StreamRecorder;
@@ -40,46 +39,21 @@ class BlogStatServiceImplTest {
     @InjectMocks
     private BlogStatServiceImpl service;
 
-    private BlogPostStat statDto;
     private Optional<BlogStat> stat;
 
     @BeforeEach
     void setup(){
         this.stat = Optional.of(new BlogStat(1000L, 2000L, 300L, 1L));
         this.stat.get().setId(1L);
-
-        this.statDto = BlogPostStat.newBuilder()
-                .setId(1)
-                .setLikes(Math.toIntExact(stat.get().getLikes()))
-                .setViews(Math.toIntExact(stat.get().getViews()))
-                .setShares(Math.toIntExact(stat.get().getShares()))
-                .build();
     }
 
     @Test
-    public void testCreateSuccess() throws Exception{
+    public void testCreateSuccess(){
         Mockito.doReturn(this.stat.get()).when(this.repository).save(Mockito.any());
 
-       CreateBlogPostStatRequest req =CreateBlogPostStatRequest.newBuilder()
-                .build();
+        BlogStat stat = service.create(1L);
 
-        StreamRecorder<BlogPostStatResponse> res = StreamRecorder.create();
-
-        service.create(req, res);
-
-        if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
-            Assertions.fail();
-        }
-
-        List<BlogPostStatResponse> results = res.getValues();
-
-        Assertions.assertEquals(1, results.size());
-
-        BlogPostStatResponse result = results.get(0);
-
-        Assertions.assertEquals(HttpStatus.CREATED.value(), result.getStatusCode());
-        Assertions.assertEquals(0, result.getErrorsCount());
-        Assertions.assertEquals(this.statDto, result.getData());
+        Assertions.assertEquals(this.stat.get(), stat);
     }
 
     @Test
@@ -309,56 +283,20 @@ class BlogStatServiceImplTest {
     }
 
     @Test
-    public void testDeleteSuccess() throws Exception{
+    public void testDeleteSuccess(){
         Mockito.doNothing().when(this.repository).deleteById(1L);
 
-        DeleteBlogPostStatRequest req = DeleteBlogPostStatRequest.newBuilder()
-                .setId(1)
-                .build();
+        boolean result = service.delete(1L);
 
-        StreamRecorder<BlogPostStatStatusResponse> res = StreamRecorder.create();
-
-        service.delete(req, res);
-
-        if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
-            Assertions.fail();
-        }
-
-        List<BlogPostStatStatusResponse> results = res.getValues();
-
-        Assertions.assertEquals(1, results.size());
-
-        BlogPostStatStatusResponse result = results.get(0);
-
-        Assertions.assertEquals(HttpStatus.OK.value(), result.getStatusCode());
-        Assertions.assertEquals(0, result.getErrorsCount());
-        Assertions.assertTrue(result.getData());
+        Assertions.assertTrue(result);
     }
 
     @Test
-    public void testDeleteNotFound() throws Exception{
+    public void testDeleteNotFound(){
         Mockito.doThrow(new EmptyResultDataAccessException("Not found stat", 1)).when(this.repository).deleteById(1L);
 
-        DeleteBlogPostStatRequest req = DeleteBlogPostStatRequest.newBuilder()
-                .setId(1)
-                .build();
+        boolean result = service.delete(1L);
 
-        StreamRecorder<BlogPostStatStatusResponse> res = StreamRecorder.create();
-
-        service.delete(req, res);
-
-        if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
-            Assertions.fail();
-        }
-
-        List<BlogPostStatStatusResponse> results = res.getValues();
-
-        Assertions.assertEquals(1, results.size());
-
-        BlogPostStatStatusResponse result = results.get(0);
-
-        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), result.getStatusCode());
-        Assertions.assertEquals(1, result.getErrorsCount());
-        Assertions.assertFalse(result.getData());
+        Assertions.assertFalse(result);
     }
 }

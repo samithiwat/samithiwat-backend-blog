@@ -1,15 +1,13 @@
 package com.samithiwat.post.stat;
 
-import com.samithiwat.post.grpc.blogsection.BlogPostSectionStatusResponse;
 import com.samithiwat.post.grpc.blogstat.*;
-import com.samithiwat.post.grpc.dto.BlogPostStat;
 import com.samithiwat.post.stat.entity.BlogStat;
 import io.grpc.stub.StreamObserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 
-public class BlogStatServiceImpl extends BlogPostStatServiceGrpc.BlogPostStatServiceImplBase {
+public class BlogStatServiceImpl extends BlogPostStatServiceGrpc.BlogPostStatServiceImplBase implements BlogStatService {
     @Autowired
     BlogStatRepository repository;
 
@@ -17,30 +15,6 @@ public class BlogStatServiceImpl extends BlogPostStatServiceGrpc.BlogPostStatSer
 
     public BlogStatServiceImpl(BlogStatRepository repository) {
         this.repository = repository;
-    }
-
-    @Override
-    public void create(CreateBlogPostStatRequest request, StreamObserver<BlogPostStatResponse> responseObserver) {
-        BlogPostStatResponse.Builder res = BlogPostStatResponse.newBuilder();
-
-        BlogStat stat = new BlogStat(
-                (long) request.getPostId()
-        );
-
-        stat = this.repository.save(stat);
-
-        com.samithiwat.post.grpc.dto.BlogPostStat result = BlogPostStat.newBuilder()
-                .setId(Math.toIntExact(stat.getId()))
-                .setLikes(Math.toIntExact(stat.getLikes()))
-                .setViews(Math.toIntExact(stat.getViews()))
-                .setShares(Math.toIntExact(stat.getShares()))
-                .build();
-
-        res.setStatusCode(HttpStatus.CREATED.value())
-                .setData(result);
-
-        responseObserver.onNext(res.build());
-        responseObserver.onCompleted();
     }
 
     @Override
@@ -73,23 +47,19 @@ public class BlogStatServiceImpl extends BlogPostStatServiceGrpc.BlogPostStatSer
     }
 
     @Override
-    public void delete(DeleteBlogPostStatRequest request, StreamObserver<BlogPostStatStatusResponse> responseObserver) {
-        BlogPostStatStatusResponse.Builder res = BlogPostStatStatusResponse.newBuilder();
+    public BlogStat create(Long postId) {
+        BlogStat stat = new BlogStat(postId);
+        return this.repository.save(stat);
+    }
+
+    @Override
+    public boolean delete(Long id) {
 
         try{
-            this.repository.deleteById((long) request.getId());
-            res.setStatusCode(HttpStatus.OK.value())
-                    .setData(true);
-
-            responseObserver.onNext(res.build());
-            responseObserver.onCompleted();
+            this.repository.deleteById(id);
+            return true;
         }catch(EmptyResultDataAccessException err){
-            res.setStatusCode(HttpStatus.NOT_FOUND.value())
-                    .addErrors("Not found section")
-                    .setData(false);
-
-            responseObserver.onNext(res.build());
-            responseObserver.onCompleted();
+            return false;
         }
     }
 }
