@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -119,20 +120,32 @@ public class BlogUserServiceTest {
     }
 
     @Test
-    public void testFindOneEntityByUserIdSuccess(){
-        Mockito.doReturn(this.user).when(this.repository).findByUserId(1l);
+    public void testFindOneOrCreateFounded(){
+        Mockito.doReturn(this.user).when(this.repository).findByUserId(1L);
+        Mockito.doReturn(this.user.get()).when(this.repository).save(Mockito.any());
 
         BlogUserServiceImpl service = new BlogUserServiceImpl(this.repository);
 
-        Assertions.assertEquals(this.user.get(), service.findOneEntityByUserId(1l));
+        com.samithiwat.post.bloguser.entity.BlogUser user = service.findOneOrCreate(1L);
+
+        Assertions.assertEquals(this.user.get(), user);
+
+        Mockito.verify(this.repository, Mockito.times(1)).findByUserId(1L);
+        Mockito.verify(this.repository, Mockito.times(0)).save(Mockito.any());
     }
 
     @Test
-    public void testFindOneEntityByUserIdNotFound(){
-        Mockito.doReturn(Optional.empty()).when(this.repository).findByUserId(1l);
+    public void testFindOneOrCreateNotFound(){
+        Mockito.doReturn(Optional.empty()).when(this.repository).findByUserId(1L);
+        Mockito.doReturn(this.user.get()).when(this.repository).save(Mockito.any());
 
         BlogUserServiceImpl service = new BlogUserServiceImpl(this.repository);
 
-        Assertions.assertNull(service.findOneEntityByUserId(1l));
+        com.samithiwat.post.bloguser.entity.BlogUser user = service.findOneOrCreate(1L);
+
+        Assertions.assertEquals(this.user.get(), user);
+
+        Mockito.verify(this.repository, Mockito.times(1)).findByUserId(1L);
+        Mockito.verify(this.repository, Mockito.times(1)).save(Mockito.any());
     }
 }

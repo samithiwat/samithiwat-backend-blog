@@ -442,7 +442,7 @@ public class BlogPostServiceTest {
     public void testCreateSuccess() throws Exception{
         Mockito.doReturn(this.stat).when(this.blogStatService).create(1L);
         Mockito.doReturn(this.userDto).when(this.blogUserService).findOne(1L);
-        Mockito.doReturn(this.user).when(this.blogUserService).findOneEntityByUserId(1L);
+        Mockito.doReturn(this.user).when(this.blogUserService).findOneOrCreate(1L);
         Mockito.doReturn(this.post.get()).when(this.repository).save(Mockito.any());
 
         CreatePostRequest req = CreatePostRequest.newBuilder()
@@ -478,7 +478,7 @@ public class BlogPostServiceTest {
     public void testCreateNotFoundUser() throws Exception{
         Mockito.doReturn(this.stat).when(this.blogStatService).create(1L);
         Mockito.doReturn(null).when(this.blogUserService).findOne(1L);
-        Mockito.doReturn(this.user).when(this.blogUserService).findOneEntityByUserId(1L);
+        Mockito.doReturn(this.user).when(this.blogUserService).findOneOrCreate(1L);
         Mockito.doReturn(this.post).when(this.repository).save(Mockito.any());
 
         CreatePostRequest req = CreatePostRequest.newBuilder()
@@ -514,7 +514,7 @@ public class BlogPostServiceTest {
     public void testCreateDuplicatedSlug() throws Exception{
         Mockito.doReturn(this.stat).when(this.blogStatService).create(1L);
         Mockito.doReturn(this.userDto).when(this.blogUserService).findOne(1L);
-        Mockito.doReturn(this.user).when(this.blogUserService).findOneEntityByUserId(1L);
+        Mockito.doReturn(this.user).when(this.blogUserService).findOneOrCreate(1L);
         Mockito.doThrow(new DataIntegrityViolationException("Duplicated slug")).when(this.repository).save(Mockito.any());
 
         CreatePostRequest req = CreatePostRequest.newBuilder()
