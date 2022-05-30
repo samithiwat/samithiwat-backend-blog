@@ -10,9 +10,7 @@ option java_package = "com.samithiwat.post.grpc.blogstat";
 option java_outer_classname = "BlogPostStat";
 
 service BlogPostStatService{
-  rpc create(CreateBlogPostStatRequest) returns (BlogPostStatResponse) {}
   rpc update(UpdateBlogPostStatRequest) returns (BlogPostStatStatusResponse) {}
-  rpc delete(DeleteBlogPostStatRequest) returns (BlogPostStatStatusResponse) {}
 }
 
 message BlogPostStatResponse {
@@ -27,21 +25,9 @@ message BlogPostStatStatusResponse {
   bool data = 3;
 }
 
-// create
-
-message CreateBlogPostStatRequest{
-  uint32 postId = 1;
-}
-
 // update
 
 message UpdateBlogPostStatRequest{
   uint32 id = 1;
   dto.StatCountType countType = 2;
-}
-
-// delete
-
-message DeleteBlogPostStatRequest{
-  uint32 id = 1;
 }
