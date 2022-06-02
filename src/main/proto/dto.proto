@@ -120,6 +120,7 @@ message BlogPost{
   bool isPublish = 5;
   string PublishDate = 6;
   dto.BlogPostStat stat = 7;
+  repeated BlogPostSection sections = 8;
 }
 
 message BlogPostSection{
@@ -134,4 +135,10 @@ message BlogPostStat{
   uint32 likes = 2;
   uint32 views = 3;
   uint32 shares = 4;
+}
+
+message BlogComment{
+  uint32 id = 1;
+  uint32 userId = 2;
+  string content = 3;
 }
