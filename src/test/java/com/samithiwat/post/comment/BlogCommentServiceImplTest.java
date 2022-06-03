@@ -18,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -439,6 +440,60 @@ class BlogCommentServiceImplTest {
         BlogCommentStatusResponse result = results.get(0);
 
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), result.getStatusCode());
+        Assertions.assertEquals(1, result.getErrorsCount());
+        Assertions.assertFalse(result.getData());
+    }
+
+    @Test
+    public void testDeleteCommentSuccess() throws Exception{
+        Mockito.doNothing().when(this.repository).deleteById(this.comment.getId());
+
+        DeleteCommentRequest req = DeleteCommentRequest.newBuilder()
+                .setId(Math.toIntExact(this.comment.getId()))
+                .build();
+
+        StreamRecorder<BlogCommentStatusResponse> res = StreamRecorder.create();
+
+        service.delete(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)) {
+            Assertions.fail();
+        }
+
+        List<BlogCommentStatusResponse> results = res.getValues();
+
+        Assertions.assertEquals(1, results.size());
+
+        BlogCommentStatusResponse result = results.get(0);
+
+        Assertions.assertEquals(HttpStatus.OK.value(), result.getStatusCode());
+        Assertions.assertEquals(0, result.getErrorsCount());
+        Assertions.assertTrue(result.getData());
+    }
+
+    @Test
+    public void testDeleteCommentNotFound() throws Exception{
+        Mockito.doThrow(new EmptyResultDataAccessException("Not found comment", 1)).when(this.repository).deleteById(this.comment.getId());
+
+        DeleteCommentRequest req = DeleteCommentRequest.newBuilder()
+                .setId(Math.toIntExact(this.comment.getId()))
+                .build();
+
+        StreamRecorder<BlogCommentStatusResponse> res = StreamRecorder.create();
+
+        service.delete(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)) {
+            Assertions.fail();
+        }
+
+        List<BlogCommentStatusResponse> results = res.getValues();
+
+        Assertions.assertEquals(1, results.size());
+
+        BlogCommentStatusResponse result = results.get(0);
+
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), result.getStatusCode());
         Assertions.assertEquals(1, result.getErrorsCount());
         Assertions.assertFalse(result.getData());
     }
