@@ -19,7 +19,7 @@ service BlogCommentService{
 message BlogCommentResponse {
   int32 StatusCode = 1;
   repeated string errors = 2;
-  dto.BlogPost data = 3;
+  dto.BlogComment data = 3;
 }
 
 message BlogCommentStatusResponse {
