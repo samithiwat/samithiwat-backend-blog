@@ -8,6 +8,7 @@ import com.samithiwat.post.post.BlogPostServiceImpl;
 import com.samithiwat.post.post.entity.Post;
 import io.grpc.stub.StreamObserver;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
@@ -165,6 +166,22 @@ public class BlogCommentServiceImpl extends BlogCommentServiceGrpc.BlogCommentSe
 
     @Override
     public void delete(DeleteCommentRequest request, StreamObserver<BlogCommentStatusResponse> responseObserver) {
-        super.delete(request, responseObserver);
+        BlogCommentStatusResponse.Builder res = BlogCommentStatusResponse.newBuilder();
+
+        try{
+            this.repository.deleteById((long) request.getId());
+            res.setStatusCode(HttpStatus.OK.value())
+                    .setData(true);
+
+            responseObserver.onNext(res.build());
+            responseObserver.onCompleted();
+        }catch(EmptyResultDataAccessException err){
+            res.setStatusCode(HttpStatus.NOT_FOUND.value())
+                    .addErrors("Not found comment")
+                    .setData(false);
+
+            responseObserver.onNext(res.build());
+            responseObserver.onCompleted();
+        }
     }
 }
