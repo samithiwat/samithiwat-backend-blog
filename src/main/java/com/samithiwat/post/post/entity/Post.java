@@ -1,6 +1,7 @@
 package com.samithiwat.post.post.entity;
 
 import com.samithiwat.post.bloguser.entity.BlogUser;
+import com.samithiwat.post.comment.entity.Comment;
 import com.samithiwat.post.section.entity.BlogSection;
 import com.samithiwat.post.stat.entity.BlogStat;
 import org.hibernate.annotations.CreationTimestamp;
@@ -16,10 +17,10 @@ import java.util.List;
 @Table(name = "post", indexes = @Index(columnList = "slug"))
 @SQLDelete(sql = "UPDATE user SET deletedDate = CURRENT_DATE WHERE id = ?")
 @Where(clause = "deletedDate IS NULL")
-public class BlogPost {
-    public BlogPost() {}
+public class Post {
+    public Post() {}
 
-    public BlogPost(BlogUser author, String slug, String summary, Boolean isPublished, Instant publishDate) {
+    public Post(BlogUser author, String slug, String summary, Boolean isPublished, Instant publishDate) {
         this.setAuthor(author);
         this.setSlug(slug);
         this.setSummary(summary);
@@ -31,14 +32,17 @@ public class BlogPost {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
+    private List<Comment> comments;
+
     @OneToOne(mappedBy = "post", cascade = CascadeType.REMOVE)
     private BlogStat stat;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private BlogUser author;
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
     private List<BlogSection> sections;
 
     @Column(unique = true)
@@ -84,6 +88,14 @@ public class BlogPost {
 
     public void setAuthor(BlogUser author) {
         this.author = author;
+    }
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
     }
 
     public List<BlogSection> getSections() {

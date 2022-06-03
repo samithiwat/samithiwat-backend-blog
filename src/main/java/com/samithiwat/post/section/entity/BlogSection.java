@@ -1,7 +1,7 @@
 package com.samithiwat.post.section.entity;
 
 import com.samithiwat.post.common.ContentType;
-import com.samithiwat.post.post.entity.BlogPost;
+import com.samithiwat.post.post.entity.Post;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -18,7 +18,7 @@ public class BlogSection {
     public BlogSection() {}
 
     public BlogSection(int pos, ContentType contentType, String content, Long postId){
-        BlogPost post = new BlogPost();
+        Post post = new Post();
         post.setId(postId);
         setPos(pos);
         setContentType(contentType);
@@ -32,7 +32,7 @@ public class BlogSection {
 
     @ManyToOne
     @JoinColumn(name = "post_id")
-    private BlogPost post;
+    private Post post;
 
     @Column
     private int pos;
@@ -61,11 +61,11 @@ public class BlogSection {
         this.id = id;
     }
 
-    public BlogPost getPost() {
+    public Post getPost() {
         return post;
     }
 
-    public void setPost(BlogPost post) {
+    public void setPost(Post post) {
         this.post = post;
     }
 

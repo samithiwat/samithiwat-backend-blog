@@ -1,6 +1,6 @@
 package com.samithiwat.post.bloguser.entity;
 
-import com.samithiwat.post.post.entity.BlogPost;
+import com.samithiwat.post.post.entity.Post;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -29,7 +29,7 @@ public class BlogUser {
     private Long userId;
 
     @OneToMany(mappedBy = "author")
-    private List<BlogPost> posts;
+    private List<Post> posts;
 
     @CreationTimestamp
     private Instant createdDate;
@@ -56,11 +56,11 @@ public class BlogUser {
         this.userId = userId;
     }
 
-    public List<BlogPost> getPosts() {
+    public List<Post> getPosts() {
         return posts;
     }
 
-    public void setPosts(List<BlogPost> posts) {
+    public void setPosts(List<Post> posts) {
         this.posts = posts;
     }
 

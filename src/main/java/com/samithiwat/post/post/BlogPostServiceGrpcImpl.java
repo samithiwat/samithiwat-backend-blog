@@ -4,7 +4,7 @@ import com.samithiwat.post.bloguser.BlogUserServiceImpl;
 import com.samithiwat.post.grpc.blogpost.*;
 import com.samithiwat.post.grpc.common.PaginationMetadata;
 import com.samithiwat.post.grpc.dto.BlogUser;
-import com.samithiwat.post.post.entity.BlogPost;
+import com.samithiwat.post.post.entity.Post;
 import com.samithiwat.post.stat.BlogStatServiceImpl;
 import io.grpc.stub.StreamObserver;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +50,7 @@ public class BlogPostServiceGrpcImpl extends BlogPostServiceGrpc.BlogPostService
 
         BlogPostPaginationResponse.Builder res = BlogPostPaginationResponse.newBuilder();
 
-        Page<BlogPost> blogPostPage = this.repository.findAll(PageRequest.of(page - 1, limit));
+        Page<Post> blogPostPage = this.repository.findAll(PageRequest.of(page - 1, limit));
 
         PaginationMetadata metadata = PaginationMetadata.newBuilder()
                 .setTotalItem(blogPostPage.getTotalElements())
@@ -63,7 +63,7 @@ public class BlogPostServiceGrpcImpl extends BlogPostServiceGrpc.BlogPostService
         BlogPostPagination.Builder result = BlogPostPagination.newBuilder()
                 .setMeta(metadata);
 
-        for(BlogPost post: blogPostPage.getContent()) {
+        for(Post post: blogPostPage.getContent()) {
             BlogUser userDto = this.userService.findOne(post.getAuthor().getUserId());
 
             com.samithiwat.post.grpc.dto.BlogPost dto = com.samithiwat.post.grpc.dto.BlogPost.newBuilder()
@@ -89,7 +89,7 @@ public class BlogPostServiceGrpcImpl extends BlogPostServiceGrpc.BlogPostService
     public void findOne(FindOnePostRequest request, StreamObserver<BlogPostResponse> responseObserver) {
         BlogPostResponse.Builder res = BlogPostResponse.newBuilder();
 
-        BlogPost post = this.repository.findById((long) request.getId()).orElse(null);
+        Post post = this.repository.findById((long) request.getId()).orElse(null);
 
         if (post == null){
             res.setStatusCode(HttpStatus.NOT_FOUND.value())
@@ -131,7 +131,7 @@ public class BlogPostServiceGrpcImpl extends BlogPostServiceGrpc.BlogPostService
     public void findBySlug(FindBySlugPostRequest request, StreamObserver<BlogPostResponse> responseObserver) {
         BlogPostResponse.Builder res = BlogPostResponse.newBuilder();
 
-        BlogPost post = this.repository.findBySlug(request.getSlug()).orElse(null);
+        Post post = this.repository.findBySlug(request.getSlug()).orElse(null);
 
         if (post == null){
             res.setStatusCode(HttpStatus.NOT_FOUND.value())
@@ -185,7 +185,7 @@ public class BlogPostServiceGrpcImpl extends BlogPostServiceGrpc.BlogPostService
         }
 
         com.samithiwat.post.bloguser.entity.BlogUser user = this.userService.findOneOrCreate((long) userDto.getId());
-        BlogPost post = new BlogPost(user, request.getSlug(), request.getSummary(), request.getIsPublish(), Instant.parse(request.getPublishDate()));
+        Post post = new Post(user, request.getSlug(), request.getSummary(), request.getIsPublish(), Instant.parse(request.getPublishDate()));
 
         try{
             post = this.repository.save(post);

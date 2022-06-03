@@ -1,6 +1,6 @@
 package com.samithiwat.post.stat.entity;
 
-import com.samithiwat.post.post.entity.BlogPost;
+import com.samithiwat.post.post.entity.Post;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -20,7 +20,7 @@ public class BlogStat {
 
     @OneToOne
     @JoinColumn(name="post_id")
-    private BlogPost post;
+    private Post post;
 
     @Column
     private Long likes;
@@ -43,13 +43,13 @@ public class BlogStat {
     public BlogStat(){}
 
     public BlogStat(Long postId){
-        BlogPost post = new BlogPost();
+        Post post = new Post();
         post.setId(postId);
         setPost(post);
     }
 
     public BlogStat(Long likes, Long views, Long shares, Long postId){
-        BlogPost post = new BlogPost();
+        Post post = new Post();
         post.setId(postId);
         setPost(post);
         setLikes(likes);
@@ -65,11 +65,11 @@ public class BlogStat {
         this.id = id;
     }
 
-    public BlogPost getPost() {
+    public Post getPost() {
         return post;
     }
 
-    public void setPost(BlogPost post) {
+    public void setPost(Post post) {
         this.post = post;
     }
 

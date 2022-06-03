@@ -7,6 +7,7 @@ import com.samithiwat.post.grpc.blogpost.*;
 import com.samithiwat.post.grpc.common.PaginationMetadata;
 import com.samithiwat.post.grpc.dto.BlogPost;
 import com.samithiwat.post.grpc.dto.BlogUser;
+import com.samithiwat.post.post.entity.Post;
 import com.samithiwat.post.stat.BlogStatServiceImpl;
 import com.samithiwat.post.stat.entity.BlogStat;
 import io.grpc.internal.testing.StreamRecorder;
@@ -58,8 +59,8 @@ public class BlogPostServiceGrpcTest {
 
     private List<BlogPost> postDtos;
     private BlogPost postDto;
-    private List<com.samithiwat.post.post.entity.BlogPost> posts;
-    private Optional<com.samithiwat.post.post.entity.BlogPost> post;
+    private List<Post> posts;
+    private Optional<Post> post;
     private BlogUser userDto;
     private com.samithiwat.post.bloguser.entity.BlogUser user;
     private BlogStat stat;
@@ -81,7 +82,7 @@ public class BlogPostServiceGrpcTest {
                 .build();
 
         this.posts = new ArrayList<>();
-        this.post = Optional.of(new com.samithiwat.post.post.entity.BlogPost(
+        this.post = Optional.of(new Post(
                 user,
                 faker.lorem().word(),
                 faker.lorem().sentence(),
@@ -90,7 +91,7 @@ public class BlogPostServiceGrpcTest {
         ));
         this.post.get().setId(1L);
 
-        com.samithiwat.post.post.entity.BlogPost post2 = new com.samithiwat.post.post.entity.BlogPost(
+        Post post2 = new Post(
                 user,
                 faker.lorem().word(),
                 faker.lorem().sentence(),
@@ -99,7 +100,7 @@ public class BlogPostServiceGrpcTest {
         );
         post2.setId(2L);
 
-        com.samithiwat.post.post.entity.BlogPost post3 = new com.samithiwat.post.post.entity.BlogPost(
+        Post post3 = new Post(
                 user,
                 faker.lorem().word(),
                 faker.lorem().sentence(),
@@ -146,7 +147,7 @@ public class BlogPostServiceGrpcTest {
 
     @Test
     public void testFindAllWithPagination() throws Exception{
-        Page<com.samithiwat.post.post.entity.BlogPost> postPagination = new Page<com.samithiwat.post.post.entity.BlogPost>() {
+        Page<Post> postPagination = new Page<Post>() {
             @Override
             public int getTotalPages() {
                 return 2;
@@ -158,7 +159,7 @@ public class BlogPostServiceGrpcTest {
             }
 
             @Override
-            public <U> Page<U> map(Function<? super com.samithiwat.post.post.entity.BlogPost, ? extends U> converter) {
+            public <U> Page<U> map(Function<? super Post, ? extends U> converter) {
                 return null;
             }
 
@@ -178,7 +179,7 @@ public class BlogPostServiceGrpcTest {
             }
 
             @Override
-            public List<com.samithiwat.post.post.entity.BlogPost> getContent() {
+            public List<Post> getContent() {
                 return posts;
             }
 
@@ -223,7 +224,7 @@ public class BlogPostServiceGrpcTest {
             }
 
             @Override
-            public Iterator<com.samithiwat.post.post.entity.BlogPost> iterator() {
+            public Iterator<Post> iterator() {
                 return null;
             }
         };

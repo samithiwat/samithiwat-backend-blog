@@ -1,8 +1,8 @@
 package com.samithiwat.post.post;
 
-import com.samithiwat.post.post.entity.BlogPost;
+import com.samithiwat.post.post.entity.Post;
 
 public interface BlogPostService {
-    BlogPost findOneEntityById(Long Id);
-    BlogPost findOneEntityBySlug(String slug);
+    Post findOneEntityById(Long Id);
+    Post findOneEntityBySlug(String slug);
 }
