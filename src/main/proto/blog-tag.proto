@@ -3,14 +3,13 @@ syntax = "proto3";
 package blog_tag;
 
 import "dto.proto";
-import "common.proto";
 
 option java_multiple_files = true;
 option java_package = "com.samithiwat.post.grpc.tag";
 option java_outer_classname = "BlogTag";
 
 service BlogTagService{
-  rpc findAll(FindAllTagByPostRequest) returns (BlogTagListResponse) {}
+  rpc findAll(FindAllTagRequest) returns (BlogTagListResponse) {}
   rpc findOne(FindOneTagRequest) returns(BlogTagResponse){} // return with posts
   rpc create(CreateTagRequest) returns (BlogTagResponse) {}
   rpc update(UpdateTagRequest) returns (BlogTagResponse) {}
@@ -37,7 +36,7 @@ message BlogTagListResponse {
 
 // findByPost
 
-message FindAllTagByPostRequest{
+message FindAllTagRequest{
   dto.SortByType sortType = 1;
 }
 
