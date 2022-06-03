@@ -59,7 +59,35 @@ public class BlogCommentServiceImpl extends BlogCommentServiceGrpc.BlogCommentSe
 
     @Override
     public void create(CreateCommentRequest request, StreamObserver<BlogCommentResponse> responseObserver) {
-        super.create(request, responseObserver);
+        BlogCommentResponse.Builder res = BlogCommentResponse.newBuilder();
+
+        Post post = this.blogPostService.findOneEntityBySlug(request.getSlug());
+
+        if(post == null){
+            res.setStatusCode(HttpStatus.NOT_FOUND.value())
+                    .addErrors("Not found post");
+
+            responseObserver.onNext(res.build());
+            responseObserver.onCompleted();
+            return;
+        }
+
+        Comment comment = new Comment(request.getContent());
+        comment = this.repository.save(comment);
+
+        BlogComment commentDto = BlogComment.newBuilder()
+                .setId(Math.toIntExact(comment.getId()))
+                .setContent(comment.getContent())
+                .setLikes(Math.toIntExact(comment.getLikes()))
+                .setUpdatedDate(comment.getUpdatedDate().toString())
+                .setCreatedDate(comment.getCreatedDate().toString())
+                .build();
+
+        res.setStatusCode(HttpStatus.CREATED.value())
+                .setData(commentDto);
+
+        responseObserver.onNext(res.build());
+        responseObserver.onCompleted();
     }
 
     @Override
