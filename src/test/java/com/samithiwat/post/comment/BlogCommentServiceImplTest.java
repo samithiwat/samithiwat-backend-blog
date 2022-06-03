@@ -4,10 +4,7 @@ import com.github.javafaker.Faker;
 import com.samithiwat.post.TestConfig;
 import com.samithiwat.post.bloguser.entity.BlogUser;
 import com.samithiwat.post.comment.entity.Comment;
-import com.samithiwat.post.grpc.blogcomment.BlogCommentListResponse;
-import com.samithiwat.post.grpc.blogcomment.BlogCommentResponse;
-import com.samithiwat.post.grpc.blogcomment.CreateCommentRequest;
-import com.samithiwat.post.grpc.blogcomment.FindAllCommentByPostRequest;
+import com.samithiwat.post.grpc.blogcomment.*;
 import com.samithiwat.post.grpc.dto.BlogComment;
 import com.samithiwat.post.post.BlogPostServiceImpl;
 import com.samithiwat.post.post.entity.Post;
@@ -27,6 +24,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @SpringBootTest(properties = {
@@ -54,7 +52,7 @@ class BlogCommentServiceImplTest {
     private Post post;
 
     @BeforeEach
-    void setup(){
+    void setup() {
         Faker faker = new Faker();
 
         BlogUser user = new BlogUser();
@@ -62,10 +60,10 @@ class BlogCommentServiceImplTest {
         user.setUserId(1L);
 
         this.comment = new Comment(faker.lorem().paragraph());
+        this.comment.setId(1L);
         this.comment.setLikes(faker.random().nextLong(10000));
         this.comment.setCreatedDate(faker.date().past(10, TimeUnit.HOURS).toInstant());
         this.comment.setUpdatedDate(faker.date().past(5, TimeUnit.HOURS).toInstant());
-        this.comment.setId(1L);
 
         Comment comment2 = new Comment(faker.lorem().paragraph());
         comment2.setLikes(faker.random().nextLong(10000));
@@ -124,7 +122,7 @@ class BlogCommentServiceImplTest {
     }
 
     @Test
-    public void testFindAllCommentsFromPostSuccess() throws Exception{
+    public void testFindAllCommentsFromPostSuccess() throws Exception {
         Mockito.doReturn(this.post).when(this.postService).findOneEntityBySlug(this.post.getSlug());
 
         FindAllCommentByPostRequest req = FindAllCommentByPostRequest.newBuilder()
@@ -137,7 +135,7 @@ class BlogCommentServiceImplTest {
 
         service.findAllCommentFromPost(req, res);
 
-        if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)) {
             Assertions.fail();
         }
 
@@ -153,7 +151,7 @@ class BlogCommentServiceImplTest {
     }
 
     @Test
-    public void testFindAllCommentByPostNotFoundPost() throws Exception{
+    public void testFindAllCommentByPostNotFoundPost() throws Exception {
         Mockito.doReturn(null).when(this.postService).findOneEntityBySlug(this.post.getSlug());
 
         FindAllCommentByPostRequest req = FindAllCommentByPostRequest.newBuilder()
@@ -166,7 +164,7 @@ class BlogCommentServiceImplTest {
 
         service.findAllCommentFromPost(req, res);
 
-        if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)) {
             Assertions.fail();
         }
 
@@ -184,7 +182,7 @@ class BlogCommentServiceImplTest {
     // TODO: Implement self reference
 
     @Test
-    public void testCreateSuccess() throws Exception{
+    public void testCreateSuccess() throws Exception {
         Mockito.doReturn(this.post).when(this.postService).findOneEntityBySlug(this.post.getSlug());
         Mockito.doReturn(this.comment).when(this.repository).save(Mockito.any());
 
@@ -198,7 +196,7 @@ class BlogCommentServiceImplTest {
 
         service.create(req, res);
 
-        if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)) {
             Assertions.fail();
         }
 
@@ -214,7 +212,7 @@ class BlogCommentServiceImplTest {
     }
 
     @Test
-    public void testCreateNotFoundPost() throws Exception{
+    public void testCreateNotFoundPost() throws Exception {
         Mockito.doReturn(null).when(this.postService).findOneEntityBySlug(this.post.getSlug());
         Mockito.doReturn(this.comment).when(this.repository).save(Mockito.any());
 
@@ -228,7 +226,7 @@ class BlogCommentServiceImplTest {
 
         service.create(req, res);
 
-        if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)) {
             Assertions.fail();
         }
 
@@ -241,5 +239,65 @@ class BlogCommentServiceImplTest {
         Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), result.getStatusCode());
         Assertions.assertEquals(1, result.getErrorsCount());
         Assertions.assertEquals(BlogComment.newBuilder().build(), result.getData());
+    }
+
+    @Test
+    public void testUpdateSuccess() throws Exception{
+        Mockito.doReturn(Optional.of(this.comment)).when(this.repository).findById(this.comment.getId());
+        Mockito.doReturn(this.comment).when(this.repository).save(Mockito.any());
+
+        UpdateCommentRequest req = UpdateCommentRequest.newBuilder()
+                .setId(Math.toIntExact(this.comment.getId()))
+                .setContent(this.comment.getContent())
+                .build();
+
+        StreamRecorder<BlogCommentResponse> res = StreamRecorder.create();
+
+        service.update(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)) {
+            Assertions.fail();
+        }
+
+        List<BlogCommentResponse> results = res.getValues();
+
+        Assertions.assertEquals(1, results.size());
+
+        BlogCommentResponse result = results.get(0);
+
+        Assertions.assertEquals(HttpStatus.OK.value(), result.getStatusCode());
+        Assertions.assertEquals(0, result.getErrorsCount());
+        Assertions.assertEquals(this.commentDto, result.getData());
+    }
+
+    @Test
+    public void testUpdateNotFound() throws Exception{
+        Mockito.doReturn(Optional.empty()).when(this.repository).findById(this.comment.getId());
+        Mockito.doReturn(this.comment).when(this.repository).save(Mockito.any());
+
+        UpdateCommentRequest req = UpdateCommentRequest.newBuilder()
+                .setId(Math.toIntExact(this.comment.getId()))
+                .setContent(this.comment.getContent())
+                .build();
+
+        StreamRecorder<BlogCommentResponse> res = StreamRecorder.create();
+
+        service.update(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)) {
+            Assertions.fail();
+        }
+
+        List<BlogCommentResponse> results = res.getValues();
+
+        Assertions.assertEquals(1, results.size());
+
+        BlogCommentResponse result = results.get(0);
+
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), result.getStatusCode());
+        Assertions.assertEquals(1, result.getErrorsCount());
+        Assertions.assertEquals(BlogComment.newBuilder().build(), result.getData());
+
+        Mockito.verify(this.repository, Mockito.times(0)).save(Mockito.any());
     }
 }
