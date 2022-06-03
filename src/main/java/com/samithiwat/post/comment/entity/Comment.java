@@ -1,6 +1,5 @@
-package com.samithiwat.post.section.entity;
+package com.samithiwat.post.comment.entity;
 
-import com.samithiwat.post.common.ContentType;
 import com.samithiwat.post.post.entity.Post;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
@@ -11,21 +10,10 @@ import javax.persistence.*;
 import java.time.Instant;
 
 @Entity
-@Table(name="section")
+@Table(name = "comment")
 @SQLDelete(sql = "UPDATE user SET deletedDate = CURRENT_DATE WHERE id = ?")
 @Where(clause = "deletedDate IS NULL")
-public class BlogSection {
-    public BlogSection() {}
-
-    public BlogSection(int pos, ContentType contentType, String content, Long postId){
-        Post post = new Post();
-        post.setId(postId);
-        setPos(pos);
-        setContentType(contentType);
-        setContent(content);
-        setPost(post);
-    }
-
+public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -35,14 +23,10 @@ public class BlogSection {
     private Post post;
 
     @Column
-    private int pos;
-
-    @Enumerated(EnumType.ORDINAL)
-    private ContentType contentType;
-
-    @Lob
-    @Column
     private String content;
+
+    @Column
+    private Long likes;
 
     @CreationTimestamp
     private Instant createdDate;
@@ -53,12 +37,11 @@ public class BlogSection {
     @Column
     private Instant deletedDate;
 
-    public Long getId() {
-        return id;
-    }
+    public Comment() {}
 
-    public void setId(Long id) {
-        this.id = id;
+    public Comment(String content) {
+        setContent(content);
+        setLikes(0L);
     }
 
     public Post getPost() {
@@ -69,20 +52,12 @@ public class BlogSection {
         this.post = post;
     }
 
-    public int getPos() {
-        return pos;
+    public Long getId() {
+        return id;
     }
 
-    public void setPos(int pos) {
-        this.pos = pos;
-    }
-
-    public ContentType getContentType() {
-        return contentType;
-    }
-
-    public void setContentType(ContentType contentType) {
-        this.contentType = contentType;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getContent() {
@@ -91,6 +66,14 @@ public class BlogSection {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public Long getLikes() {
+        return likes;
+    }
+
+    public void setLikes(Long likes) {
+        this.likes = likes;
     }
 
     public Instant getCreatedDate() {
@@ -107,13 +90,5 @@ public class BlogSection {
 
     public void setUpdatedDate(Instant updatedDate) {
         this.updatedDate = updatedDate;
-    }
-
-    public Instant getDeletedDate() {
-        return deletedDate;
-    }
-
-    public void setDeletedDate(Instant deletedDate) {
-        this.deletedDate = deletedDate;
     }
 }

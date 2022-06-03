@@ -1,6 +1,6 @@
 package com.samithiwat.post.post;
 
-import com.samithiwat.post.post.entity.BlogPost;
+import com.samithiwat.post.post.entity.Post;
 
 public class BlogPostServiceImpl implements BlogPostService {
     private BlogPostRepository repository;
@@ -10,12 +10,12 @@ public class BlogPostServiceImpl implements BlogPostService {
     }
 
     @Override
-    public BlogPost findOneEntityById(Long id) {
+    public Post findOneEntityById(Long id) {
         return this.repository.findById(id).orElse(null);
     }
 
     @Override
-    public BlogPost findOneEntityBySlug(String slug) {
+    public Post findOneEntityBySlug(String slug) {
         return this.repository.findBySlug(slug).orElse(null);
     }
 }
