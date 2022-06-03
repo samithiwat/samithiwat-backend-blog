@@ -1,6 +1,7 @@
 package com.samithiwat.post.comment;
 
 import com.samithiwat.post.comment.entity.Comment;
+import com.samithiwat.post.comment.exception.InvalidUpdateLikeTypeException;
 import com.samithiwat.post.grpc.blogcomment.*;
 import com.samithiwat.post.grpc.dto.BlogComment;
 import com.samithiwat.post.post.BlogPostServiceImpl;
@@ -118,6 +119,45 @@ public class BlogCommentServiceImpl extends BlogCommentServiceGrpc.BlogCommentSe
 
         res.setStatusCode(HttpStatus.OK.value())
                 .setData(commentDto);
+
+        responseObserver.onNext(res.build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void updateLikes(UpdateCommentLikeRequest request, StreamObserver<BlogCommentStatusResponse> responseObserver) {
+        BlogCommentStatusResponse.Builder res = BlogCommentStatusResponse.newBuilder();
+
+        boolean isUpdated = false;
+
+        try{
+            isUpdated = switch (request.getType()){
+                case LIKE_INCREASE -> this.repository.increaseLike((long) request.getId());
+                case LIKE_DECREASE -> this.repository.decreaseLike((long) request.getId());
+                default -> throw new InvalidUpdateLikeTypeException();
+            };
+        }catch (InvalidUpdateLikeTypeException e) {
+            res.setStatusCode(HttpStatus.BAD_REQUEST.value())
+                    .addErrors("Invalid updated type")
+                    .setData(false);
+
+            responseObserver.onNext(res.build());
+            responseObserver.onCompleted();
+            return;
+        }
+
+        if(!isUpdated){
+            res.setStatusCode(HttpStatus.NOT_FOUND.value())
+                    .addErrors("Not found comment")
+                    .setData(false);
+
+            responseObserver.onNext(res.build());
+            responseObserver.onCompleted();
+            return;
+        }
+
+        res.setStatusCode(HttpStatus.OK.value())
+                .setData(true);
 
         responseObserver.onNext(res.build());
         responseObserver.onCompleted();
