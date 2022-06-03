@@ -13,6 +13,7 @@ service BlogCommentService{
   rpc findAllCommentFromPost(FindAllCommentByPostRequest) returns (BlogCommentListResponse) {}
   rpc create(CreateCommentRequest) returns (BlogCommentResponse) {}
   rpc update(UpdateCommentRequest) returns (BlogCommentResponse) {}
+  rpc updateLikes(UpdateCommentLikeRequest) returns (BlogCommentResponse) {}
   rpc delete(DeleteCommentRequest) returns (BlogCommentStatusResponse) {}
 }
 
@@ -62,6 +63,13 @@ message CreateCommentRequest{
 message UpdateCommentRequest{
   uint32 id = 1;
   string content = 2;
+}
+
+// updateLikes
+
+message UpdateCommentLikeRequest{
+  uint32 id = 1;
+  dto.StatCountType type = 2;
 }
 
 // delete
