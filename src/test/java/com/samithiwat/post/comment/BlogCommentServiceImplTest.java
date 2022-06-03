@@ -47,7 +47,6 @@ class BlogCommentServiceImplTest {
     BlogCommentServiceImpl service;
 
     private Comment comment;
-    private List<Comment> comments;
     private BlogComment commentDto;
     private List<BlogComment> commentsDto;
     private Post post;
@@ -78,10 +77,12 @@ class BlogCommentServiceImplTest {
         comment3.setUpdatedDate(faker.date().past(5, TimeUnit.HOURS).toInstant());
         comment3.setId(3L);
 
-        this.comments = new ArrayList<>();
-        this.comments.add(this.comment);
-        this.comments.add(comment2);
-        this.comments.add(comment3);
+
+
+        List<Comment> comments = new ArrayList<>();
+        comments.add(this.comment);
+        comments.add(comment2);
+        comments.add(comment3);
 
         this.commentDto = BlogComment.newBuilder()
                 .setId(Math.toIntExact(this.comment.getId()))
@@ -119,7 +120,7 @@ class BlogCommentServiceImplTest {
                 true,
                 faker.date().past(1, TimeUnit.DAYS).toInstant()
         );
-        this.post.setComments(this.comments);
+        this.post.setComments(comments);
     }
 
     @Test
