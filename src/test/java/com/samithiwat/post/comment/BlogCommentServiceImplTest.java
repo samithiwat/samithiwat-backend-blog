@@ -6,6 +6,7 @@ import com.samithiwat.post.bloguser.entity.BlogUser;
 import com.samithiwat.post.comment.entity.Comment;
 import com.samithiwat.post.grpc.blogcomment.*;
 import com.samithiwat.post.grpc.dto.BlogComment;
+import com.samithiwat.post.grpc.dto.StatCountType;
 import com.samithiwat.post.post.BlogPostServiceImpl;
 import com.samithiwat.post.post.entity.Post;
 import io.grpc.internal.testing.StreamRecorder;
@@ -299,5 +300,145 @@ class BlogCommentServiceImplTest {
         Assertions.assertEquals(BlogComment.newBuilder().build(), result.getData());
 
         Mockito.verify(this.repository, Mockito.times(0)).save(Mockito.any());
+    }
+
+    @Test
+    public void testUpdateLikeIncreaseSuccess() throws Exception{
+        Mockito.doReturn(true).when(this.repository).increaseLike(this.comment.getId());
+
+        UpdateCommentLikeRequest req = UpdateCommentLikeRequest.newBuilder()
+                .setId(Math.toIntExact(this.comment.getId()))
+                .setType(StatCountType.LIKE_INCREASE)
+                .build();
+
+        StreamRecorder<BlogCommentStatusResponse> res = StreamRecorder.create();
+
+        service.updateLikes(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)) {
+            Assertions.fail();
+        }
+
+        List<BlogCommentStatusResponse> results = res.getValues();
+
+        Assertions.assertEquals(1, results.size());
+
+        BlogCommentStatusResponse result = results.get(0);
+
+        Assertions.assertEquals(HttpStatus.OK.value(), result.getStatusCode());
+        Assertions.assertEquals(0, result.getErrorsCount());
+        Assertions.assertTrue(result.getData());
+    }
+
+    @Test
+    public void testUpdateLikeIncreaseNotFoundComment() throws Exception{
+        Mockito.doReturn(false).when(this.repository).decreaseLike(this.comment.getId());
+
+        UpdateCommentLikeRequest req = UpdateCommentLikeRequest.newBuilder()
+                .setId(Math.toIntExact(this.comment.getId()))
+                .setType(StatCountType.LIKE_INCREASE)
+                .build();
+
+        StreamRecorder<BlogCommentStatusResponse> res = StreamRecorder.create();
+
+        service.updateLikes(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)) {
+            Assertions.fail();
+        }
+
+        List<BlogCommentStatusResponse> results = res.getValues();
+
+        Assertions.assertEquals(1, results.size());
+
+        BlogCommentStatusResponse result = results.get(0);
+
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), result.getStatusCode());
+        Assertions.assertEquals(1, result.getErrorsCount());
+        Assertions.assertFalse(result.getData());
+    }
+
+    @Test
+    public void testUpdateLikeDecreaseSuccess() throws Exception{
+        Mockito.doReturn(true).when(this.repository).decreaseLike(this.comment.getId());
+
+        UpdateCommentLikeRequest req = UpdateCommentLikeRequest.newBuilder()
+                .setId(Math.toIntExact(this.comment.getId()))
+                .setType(StatCountType.LIKE_DECREASE)
+                .build();
+
+        StreamRecorder<BlogCommentStatusResponse> res = StreamRecorder.create();
+
+        service.updateLikes(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)) {
+            Assertions.fail();
+        }
+
+        List<BlogCommentStatusResponse> results = res.getValues();
+
+        Assertions.assertEquals(1, results.size());
+
+        BlogCommentStatusResponse result = results.get(0);
+
+        Assertions.assertEquals(HttpStatus.OK.value(), result.getStatusCode());
+        Assertions.assertEquals(0, result.getErrorsCount());
+        Assertions.assertTrue(result.getData());
+    }
+
+    @Test
+    public void testUpdateLikeDecreaseNotFoundComment() throws Exception{
+        Mockito.doReturn(false).when(this.repository).decreaseLike(this.comment.getId());
+
+        UpdateCommentLikeRequest req = UpdateCommentLikeRequest.newBuilder()
+                .setId(Math.toIntExact(this.comment.getId()))
+                .setType(StatCountType.LIKE_DECREASE)
+                .build();
+
+        StreamRecorder<BlogCommentStatusResponse> res = StreamRecorder.create();
+
+        service.updateLikes(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)) {
+            Assertions.fail();
+        }
+
+        List<BlogCommentStatusResponse> results = res.getValues();
+
+        Assertions.assertEquals(1, results.size());
+
+        BlogCommentStatusResponse result = results.get(0);
+
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), result.getStatusCode());
+        Assertions.assertEquals(1, result.getErrorsCount());
+        Assertions.assertFalse(result.getData());
+    }
+
+    @Test
+    public void testUpdateLikeInvalidType() throws Exception{
+        Mockito.doReturn(true).when(this.repository).decreaseLike(this.comment.getId());
+
+        UpdateCommentLikeRequest req = UpdateCommentLikeRequest.newBuilder()
+                .setId(Math.toIntExact(this.comment.getId()))
+                .setType(StatCountType.VIEW_INCREASE)
+                .build();
+
+        StreamRecorder<BlogCommentStatusResponse> res = StreamRecorder.create();
+
+        service.updateLikes(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)) {
+            Assertions.fail();
+        }
+
+        List<BlogCommentStatusResponse> results = res.getValues();
+
+        Assertions.assertEquals(1, results.size());
+
+        BlogCommentStatusResponse result = results.get(0);
+
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), result.getStatusCode());
+        Assertions.assertEquals(1, result.getErrorsCount());
+        Assertions.assertFalse(result.getData());
     }
 }
