@@ -41,6 +41,7 @@ public class Comment {
 
     public Comment(String content) {
         setContent(content);
+        setLikes(0L);
     }
 
     public Post getPost() {
