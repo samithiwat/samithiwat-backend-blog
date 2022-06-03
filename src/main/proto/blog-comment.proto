@@ -13,7 +13,7 @@ service BlogCommentService{
   rpc findAllCommentFromPost(FindAllCommentByPostRequest) returns (BlogCommentListResponse) {}
   rpc create(CreateCommentRequest) returns (BlogCommentResponse) {}
   rpc update(UpdateCommentRequest) returns (BlogCommentResponse) {}
-  rpc updateLikes(UpdateCommentLikeRequest) returns (BlogCommentResponse) {}
+  rpc updateLikes(UpdateCommentLikeRequest) returns (BlogCommentStatusResponse) {}
   rpc delete(DeleteCommentRequest) returns (BlogCommentStatusResponse) {}
 }
 
