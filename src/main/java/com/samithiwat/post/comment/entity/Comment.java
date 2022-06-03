@@ -1,5 +1,6 @@
 package com.samithiwat.post.comment.entity;
 
+import com.samithiwat.post.post.entity.Post;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -17,8 +18,15 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "post_id")
+    private Post post;
+
     @Column
     private String content;
+
+    @Column
+    private Long likes;
 
     @CreationTimestamp
     private Instant createdDate;
@@ -35,6 +43,14 @@ public class Comment {
         setContent(content);
     }
 
+    public Post getPost() {
+        return post;
+    }
+
+    public void setPost(Post post) {
+        this.post = post;
+    }
+
     public Long getId() {
         return id;
     }
@@ -49,5 +65,29 @@ public class Comment {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public Long getLikes() {
+        return likes;
+    }
+
+    public void setLikes(Long likes) {
+        this.likes = likes;
+    }
+
+    public Instant getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Instant createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public Instant getUpdatedDate() {
+        return updatedDate;
+    }
+
+    public void setUpdatedDate(Instant updatedDate) {
+        this.updatedDate = updatedDate;
     }
 }
