@@ -92,7 +92,35 @@ public class BlogCommentServiceImpl extends BlogCommentServiceGrpc.BlogCommentSe
 
     @Override
     public void update(UpdateCommentRequest request, StreamObserver<BlogCommentResponse> responseObserver) {
-        super.update(request, responseObserver);
+        BlogCommentResponse.Builder res = BlogCommentResponse.newBuilder();
+
+        Comment comment = this.repository.findById((long) request.getId()).orElse(null);
+
+        if(comment == null){
+            res.setStatusCode(HttpStatus.NOT_FOUND.value())
+                    .addErrors("Not found comment");
+
+            responseObserver.onNext(res.build());
+            responseObserver.onCompleted();
+            return;
+        }
+
+        comment.setContent(request.getContent());
+        comment = this.repository.save(comment);
+
+        BlogComment commentDto = BlogComment.newBuilder()
+                .setId(Math.toIntExact(comment.getId()))
+                .setContent(comment.getContent())
+                .setLikes(Math.toIntExact(comment.getLikes()))
+                .setUpdatedDate(comment.getUpdatedDate().toString())
+                .setCreatedDate(comment.getCreatedDate().toString())
+                .build();
+
+        res.setStatusCode(HttpStatus.OK.value())
+                .setData(commentDto);
+
+        responseObserver.onNext(res.build());
+        responseObserver.onCompleted();
     }
 
     @Override
