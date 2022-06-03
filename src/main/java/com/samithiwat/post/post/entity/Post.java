@@ -4,12 +4,14 @@ import com.samithiwat.post.bloguser.entity.BlogUser;
 import com.samithiwat.post.comment.entity.Comment;
 import com.samithiwat.post.section.entity.BlogSection;
 import com.samithiwat.post.stat.entity.BlogStat;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.annotations.Where;
+import com.samithiwat.post.tag.entity.Tag;
+import org.hibernate.annotations.*;
 
 import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Index;
+import javax.persistence.Table;
 import java.time.Instant;
 import java.util.List;
 
@@ -32,7 +34,8 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "post")
+    @Fetch(value = FetchMode.SUBSELECT)
     private List<Comment> comments;
 
     @OneToOne(mappedBy = "post", cascade = CascadeType.REMOVE)
@@ -42,8 +45,16 @@ public class Post {
     @JoinColumn(name = "user_id")
     private BlogUser author;
 
-    @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "post")
+    @Fetch(value = FetchMode.SUBSELECT)
     private List<BlogSection> sections;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "post_tag",
+            joinColumns = @JoinColumn(name="post_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name="tag_id",referencedColumnName = "id")
+    )
+    private List<Tag> tags;
 
     @Column(unique = true)
     private String slug;
@@ -80,6 +91,14 @@ public class Post {
 
     public void setStat(BlogStat stat) {
         this.stat = stat;
+    }
+
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
     }
 
     public BlogUser getAuthor() {
