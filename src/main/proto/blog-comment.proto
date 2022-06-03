@@ -10,7 +10,7 @@ option java_package = "com.samithiwat.post.grpc.blogcomment";
 option java_outer_classname = "BlogComment";
 
 service BlogCommentService{
-  rpc findAllCommentFromPost(FindAllCommentByPostRequest) returns (BlogCommentPaginationResponse) {}
+  rpc findAllCommentFromPost(FindAllCommentByPostRequest) returns (BlogCommentListResponse) {}
   rpc create(CreateCommentRequest) returns (BlogCommentResponse) {}
   rpc update(UpdateCommentRequest) returns (BlogCommentResponse) {}
   rpc delete(DeleteCommentRequest) returns (BlogCommentStatusResponse) {}
@@ -28,21 +28,10 @@ message BlogCommentStatusResponse {
   bool data = 3;
 }
 
-message BlogPostListResponse {
+message BlogCommentListResponse {
   int32 StatusCode = 1;
   repeated string errors = 2;
   repeated dto.BlogComment data = 3;
-}
-
-message BlogCommentPagination{
-  repeated dto.BlogComment items = 1;
-  common.PaginationMetadata meta = 2;
-}
-
-message BlogCommentPaginationResponse{
-  int32 StatusCode = 1;
-  repeated string errors = 2;
-  BlogCommentPagination data = 3;
 }
 
 // findByPost
