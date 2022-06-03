@@ -141,4 +141,7 @@ message BlogComment{
   uint32 id = 1;
   uint32 userId = 2;
   string content = 3;
+  uint32 likes = 4;
+  string createdDate = 5;
+  string updatedDate = 6;
 }
