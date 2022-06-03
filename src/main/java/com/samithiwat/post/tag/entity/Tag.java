@@ -1,18 +1,26 @@
 package com.samithiwat.post.tag.entity;
 
+import com.samithiwat.post.post.entity.Post;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.Where;
 
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.Instant;
+import java.util.List;
 
+@Entity
+@Table(name = "tag")
+@SQLDelete(sql = "UPDATE user SET deletedDate = CURRENT_DATE WHERE id = ?")
+@Where(clause = "deletedDate IS NULL")
 public class Tag {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
+    @ManyToMany(mappedBy = "tags", fetch = FetchType.EAGER)
+    private List<Post> posts;
 
     @Column
     private String name;
@@ -25,6 +33,20 @@ public class Tag {
 
     @Column
     private Instant deletedDate;
+
+    public Tag(){}
+
+    public Tag(String name){
+        setName(name);
+    }
+
+    public List<Post> getPosts() {
+        return posts;
+    }
+
+    public void setPosts(List<Post> posts) {
+        this.posts = posts;
+    }
 
     public Long getId() {
         return id;
