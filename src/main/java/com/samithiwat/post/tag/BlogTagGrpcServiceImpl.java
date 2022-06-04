@@ -10,6 +10,7 @@ import com.samithiwat.post.post.entity.Post;
 import com.samithiwat.post.tag.entity.Tag;
 import io.grpc.stub.StreamObserver;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 
@@ -100,7 +101,29 @@ public class BlogTagGrpcServiceImpl extends BlogTagServiceGrpc.BlogTagServiceImp
 
     @Override
     public void create(CreateTagRequest request, StreamObserver<BlogTagResponse> responseObserver) {
+        BlogTagResponse.Builder res = BlogTagResponse.newBuilder();
 
+        Tag tag = new Tag(request.getName());
+
+        try{
+            tag = this.repository.save(tag);
+
+            BlogTag.Builder result = BlogTag.newBuilder()
+                    .setId(Math.toIntExact(tag.getId()))
+                    .setName(tag.getName());
+
+            res.setStatusCode(HttpStatus.CREATED.value())
+                    .setData(result.build());
+
+            responseObserver.onNext(res.build());
+            responseObserver.onCompleted();
+        }catch(DataIntegrityViolationException err){
+            res.setStatusCode(HttpStatus.UNPROCESSABLE_ENTITY.value())
+                    .addErrors("Duplicated tag name");
+
+            responseObserver.onNext(res.build());
+            responseObserver.onCompleted();
+        }
     }
 
     @Override
