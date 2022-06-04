@@ -127,8 +127,26 @@ public class BlogTagGrpcServiceImpl extends BlogTagServiceGrpc.BlogTagServiceImp
     }
 
     @Override
-    public void update(UpdateTagRequest request, StreamObserver<BlogTagResponse> responseObserver) {
-        super.update(request, responseObserver);
+    public void update(UpdateTagRequest request, StreamObserver<BlogTagStatusResponse> responseObserver) {
+        BlogTagStatusResponse.Builder res = BlogTagStatusResponse.newBuilder();
+
+        boolean isUpdated = this.repository.update((long) request.getId(), request.getName());
+
+        if(!isUpdated){
+            res.setStatusCode(HttpStatus.NOT_FOUND.value())
+                    .addErrors("Not found tag")
+                    .setData(false);
+
+            responseObserver.onNext(res.build());
+            responseObserver.onCompleted();
+            return;
+        }
+
+        res.setStatusCode(HttpStatus.OK.value())
+                .setData(true);
+
+        responseObserver.onNext(res.build());
+        responseObserver.onCompleted();
     }
 
     @Override
