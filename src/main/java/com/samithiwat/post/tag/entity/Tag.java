@@ -22,7 +22,7 @@ public class Tag {
     @ManyToMany(mappedBy = "tags", fetch = FetchType.EAGER)
     private List<Post> posts;
 
-    @Column
+    @Column(unique = true)
     private String name;
 
     @CreationTimestamp
