@@ -8,7 +8,6 @@ import com.samithiwat.blog.grpc.dto.BlogUser;
 import com.samithiwat.blog.grpc.dto.BlogPost;
 import com.samithiwat.blog.post.entity.Post;
 import com.samithiwat.blog.stat.BlogStatGrpcServiceImpl;
-import com.samithiwat.blog.user.UserServiceImpl;
 import io.grpc.stub.StreamObserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -187,7 +186,7 @@ public class BlogPostServiceGrpcImpl extends BlogPostServiceGrpc.BlogPostService
             return;
         }
 
-        BUser user = this.userService.findOneOrCreate((long) userDto.getId());
+        BUser user = this.userService.findOneEntity((long) userDto.getId());
         Post post = new Post(user, request.getSlug(), request.getSummary(), request.getIsPublish(), Instant.parse(request.getPublishDate()));
 
         try{

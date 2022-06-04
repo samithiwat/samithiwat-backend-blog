@@ -98,35 +98,24 @@ public class BlogUserServiceTest{
     }
 
     @Test
-    public void testFIndOneNOtFoundUserFromSamithiwatBackend(){
+    public void testFindOneNotFoundUserFromSamithiwatBackend(){
         Mockito.doReturn(Optional.of(this.user)).when(this.repository).findById(this.user.getId());
         Mockito.doReturn(null).when(this.userService).findOne(this.user.getUserId());
 
-        Assertions.assertNull(service.findOne(this.user.getId()));
+        Assertions.assertNull(service.findOneEntity(this.user.getId()));
     }
 
     @Test
-    public void testFindOneOrCreateFounded(){
+    public void testFindOneEntitySuccess(){
         Mockito.doReturn(Optional.of(this.user)).when(this.repository).findByUserId(1L);
-        Mockito.doReturn(this.user).when(this.repository).save(Mockito.any());
 
-        Assertions.assertEquals(this.user, service.findOneOrCreate(this.user.getId()));
-
-        Mockito.verify(this.repository, Mockito.times(1)).findByUserId(1L);
-        Mockito.verify(this.repository, Mockito.times(0)).save(Mockito.any());
+        Assertions.assertEquals(this.user, service.findOneEntity(this.user.getId()));
     }
 
     @Test
-    public void testFindOneOrCreateNotFound(){
+    public void testFindOneEntityNotFound(){
         Mockito.doReturn(Optional.empty()).when(this.repository).findByUserId(1L);
-        Mockito.doReturn(this.user).when(this.repository).save(Mockito.any());
 
-
-        BUser user = service.findOneOrCreate(1L);
-
-        Assertions.assertEquals(this.user, user);
-
-        Mockito.verify(this.repository, Mockito.times(1)).findByUserId(1L);
-        Mockito.verify(this.repository, Mockito.times(1)).save(Mockito.any());
+        Assertions.assertNull(service.findOneEntity(this.user.getId()));
     }
 }
