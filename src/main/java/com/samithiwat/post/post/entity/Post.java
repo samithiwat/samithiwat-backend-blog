@@ -1,6 +1,6 @@
 package com.samithiwat.post.post.entity;
 
-import com.samithiwat.post.bloguser.entity.BlogUser;
+import com.samithiwat.post.bloguser.entity.BUser;
 import com.samithiwat.post.comment.entity.Comment;
 import com.samithiwat.post.section.entity.BlogSection;
 import com.samithiwat.post.stat.entity.BlogStat;
@@ -22,7 +22,7 @@ import java.util.List;
 public class Post {
     public Post() {}
 
-    public Post(BlogUser author, String slug, String summary, Boolean isPublished, Instant publishDate) {
+    public Post(BUser author, String slug, String summary, Boolean isPublished, Instant publishDate) {
         this.setAuthor(author);
         this.setSlug(slug);
         this.setSummary(summary);
@@ -43,7 +43,7 @@ public class Post {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
-    private BlogUser author;
+    private BUser author;
 
     @OneToMany(mappedBy = "post")
     @Fetch(value = FetchMode.SUBSELECT)
@@ -101,11 +101,11 @@ public class Post {
         this.tags = tags;
     }
 
-    public BlogUser getAuthor() {
+    public BUser getAuthor() {
         return author;
     }
 
-    public void setAuthor(BlogUser author) {
+    public void setAuthor(BUser author) {
         this.author = author;
     }
 

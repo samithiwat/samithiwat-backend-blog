@@ -2,7 +2,7 @@ package com.samithiwat.post.comment;
 
 import com.github.javafaker.Faker;
 import com.samithiwat.post.TestConfig;
-import com.samithiwat.post.bloguser.entity.BlogUser;
+import com.samithiwat.post.bloguser.entity.BUser;
 import com.samithiwat.post.comment.entity.Comment;
 import com.samithiwat.post.grpc.blogcomment.*;
 import com.samithiwat.post.grpc.dto.BlogComment;
@@ -56,7 +56,7 @@ class BlogCommentServiceImplTest {
     void setup() {
         Faker faker = new Faker();
 
-        BlogUser user = new BlogUser();
+        BUser user = new BUser();
         user.setId(1L);
         user.setUserId(1L);
 

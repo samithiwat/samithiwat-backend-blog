@@ -1,6 +1,7 @@
 package com.samithiwat.post.post;
 
 import com.samithiwat.post.bloguser.BlogUserServiceImpl;
+import com.samithiwat.post.bloguser.entity.BUser;
 import com.samithiwat.post.grpc.blogpost.*;
 import com.samithiwat.post.grpc.common.PaginationMetadata;
 import com.samithiwat.post.grpc.dto.BlogUser;
@@ -184,7 +185,7 @@ public class BlogPostServiceGrpcImpl extends BlogPostServiceGrpc.BlogPostService
             return;
         }
 
-        com.samithiwat.post.bloguser.entity.BlogUser user = this.userService.findOneOrCreate((long) userDto.getId());
+        BUser user = this.userService.findOneOrCreate((long) userDto.getId());
         Post post = new Post(user, request.getSlug(), request.getSummary(), request.getIsPublish(), Instant.parse(request.getPublishDate()));
 
         try{

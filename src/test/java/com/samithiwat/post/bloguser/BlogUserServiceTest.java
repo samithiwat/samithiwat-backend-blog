@@ -3,6 +3,7 @@ package com.samithiwat.post.bloguser;
 
 import com.github.javafaker.Faker;
 import com.samithiwat.post.TestConfig;
+import com.samithiwat.post.bloguser.entity.BUser;
 import com.samithiwat.post.grpc.bloguser.BlogUserResponse;
 import com.samithiwat.post.grpc.bloguser.BlogUserServiceGrpc;
 import com.samithiwat.post.grpc.bloguser.FindOneUserRequest;
@@ -43,14 +44,14 @@ public class BlogUserServiceTest {
     private BlogUserRepository repository;
 
     private BlogUser userDto;
-    private Optional<com.samithiwat.post.bloguser.entity.BlogUser> user;
+    private Optional<BUser> user;
     private Faker faker;
 
     @BeforeEach
     void setup(){
         this.faker = new Faker();
 
-        this.user = Optional.of(new com.samithiwat.post.bloguser.entity.BlogUser(1l));
+        this.user = Optional.of(new BUser(1l));
 
         this.userDto = BlogUser.newBuilder()
                 .setId(1)
@@ -125,7 +126,7 @@ public class BlogUserServiceTest {
 
         BlogUserServiceImpl service = new BlogUserServiceImpl(this.repository);
 
-        com.samithiwat.post.bloguser.entity.BlogUser user = service.findOneOrCreate(1L);
+        BUser user = service.findOneOrCreate(1L);
 
         Assertions.assertEquals(this.user.get(), user);
 
@@ -140,7 +141,7 @@ public class BlogUserServiceTest {
 
         BlogUserServiceImpl service = new BlogUserServiceImpl(this.repository);
 
-        com.samithiwat.post.bloguser.entity.BlogUser user = service.findOneOrCreate(1L);
+        BUser user = service.findOneOrCreate(1L);
 
         Assertions.assertEquals(this.user.get(), user);
 

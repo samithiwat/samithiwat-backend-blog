@@ -2,13 +2,15 @@ package com.samithiwat.post.tag;
 
 import com.github.javafaker.Faker;
 import com.samithiwat.post.TestConfig;
-import com.samithiwat.post.bloguser.entity.BlogUser;
-import com.samithiwat.post.grpc.dto.BlogTag;
-import com.samithiwat.post.grpc.dto.SortByType;
+import com.samithiwat.post.bloguser.BlogUserServiceImpl;
+import com.samithiwat.post.bloguser.entity.BUser;
+import com.samithiwat.post.grpc.dto.*;
 import com.samithiwat.post.grpc.tag.BlogTagListResponse;
 import com.samithiwat.post.grpc.tag.BlogTagResponse;
 import com.samithiwat.post.grpc.tag.FindAllTagRequest;
+import com.samithiwat.post.grpc.tag.FindOneTagRequest;
 import com.samithiwat.post.post.entity.Post;
+import com.samithiwat.post.stat.entity.BlogStat;
 import com.samithiwat.post.tag.entity.Tag;
 import io.grpc.internal.testing.StreamRecorder;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +28,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,6 +45,9 @@ class BlogTagGrpcServiceImplTest {
     @Mock
     BlogTagRepository repository;
 
+    @Mock
+    BlogUserServiceImpl userService;
+
     @InjectMocks
     BlogTagGrpcServiceImpl service;
 
@@ -49,15 +55,25 @@ class BlogTagGrpcServiceImplTest {
     private List<Tag> tags;
     private BlogTag tagDto;
     private List<BlogTag> tagsDto;
+    private List<BlogTag> tagsDtoWithoutPost;
     private Post post;
+    private BlogUser userDto;
+    private BUser user;
 
     @BeforeEach
     void setup() {
         Faker faker = new Faker();
 
-        BlogUser user = new BlogUser();
-        user.setId(1L);
-        user.setUserId(1L);
+        this.user = new BUser(1L);
+        this.user.setId(1L);
+
+        this.userDto = BlogUser.newBuilder()
+                .setId(Math.toIntExact(this.user.getUserId()))
+                .setDisplayName(faker.name().username())
+                .setFirstname(faker.name().firstName())
+                .setLastname(faker.name().lastName())
+                .setDescription(faker.lorem().paragraph())
+                .build();
 
         this.tag = new Tag(faker.lorem().word());
         this.tag.setId(1L);
@@ -73,9 +89,107 @@ class BlogTagGrpcServiceImplTest {
         this.tags.add(tag2);
         this.tags.add(tag3);
 
+        BlogStat stat = new BlogStat();
+        stat.setLikes(faker.random().nextLong(100000));
+        stat.setViews(faker.random().nextLong(100000));
+        stat.setShares(faker.random().nextLong(100000));
+
+        BlogStat stat2 = new BlogStat();
+        stat2.setLikes(faker.random().nextLong(100000));
+        stat2.setViews(faker.random().nextLong(100000));
+        stat2.setShares(faker.random().nextLong(100000));
+
+        BlogStat stat3 = new BlogStat();
+        stat3.setLikes(faker.random().nextLong(100000));
+        stat3.setViews(faker.random().nextLong(100000));
+        stat3.setShares(faker.random().nextLong(100000));
+
+        this.post = new Post(
+                this.user,
+                faker.lorem().word(),
+                faker.lorem().sentence(),
+                true,
+                faker.date().past(1, TimeUnit.DAYS).toInstant()
+        );
+        this.post.setId(1L);
+        this.post.setStat(stat);
+
+        Post post2 = new Post(
+                this.user,
+                faker.lorem().word(),
+                faker.lorem().sentence(),
+                true,
+                faker.date().past(1, TimeUnit.DAYS).toInstant()
+        );
+        post2.setId(2L);
+        post2.setStat(stat2);
+
+        Post post3 = new Post(
+                this.user,
+                faker.lorem().word(),
+                faker.lorem().sentence(),
+                true,
+                faker.date().past(1, TimeUnit.DAYS).toInstant()
+        );
+        post3.setId(3L);
+        post3.setStat(stat3);
+
+        List<Post> posts = new ArrayList<>();
+        posts.add(this.post);
+        posts.add(post2);
+        posts.add(post3);
+
+        BlogPostStat statDto = BlogPostStat.newBuilder()
+                .setViews(Math.toIntExact(stat.getViews()))
+                .setLikes(Math.toIntExact(stat.getLikes()))
+                .setShares(Math.toIntExact(stat.getShares()))
+                .build();
+
+        BlogPostStat statDto2 = BlogPostStat.newBuilder()
+                .setViews(Math.toIntExact(stat2.getViews()))
+                .setLikes(Math.toIntExact(stat2.getLikes()))
+                .setShares(Math.toIntExact(stat2.getShares()))
+                .build();
+
+        BlogPostStat statDto3 = BlogPostStat.newBuilder()
+                .setViews(Math.toIntExact(stat3.getViews()))
+                .setLikes(Math.toIntExact(stat3.getLikes()))
+                .setShares(Math.toIntExact(stat3.getShares()))
+                .build();
+
+        BlogPost postDto = BlogPost.newBuilder()
+                .setId(Math.toIntExact(this.post.getId()))
+                .setSummary(this.post.getSummary())
+                .setAuthor(this.userDto)
+                .setStat(statDto)
+                .setPublishDate(this.post.getPublishDate().toString())
+                .build();
+
+        BlogPost postDto2 = BlogPost.newBuilder()
+                .setId(Math.toIntExact(post2.getId()))
+                .setSummary(post2.getSummary())
+                .setAuthor(this.userDto)
+                .setStat(statDto2)
+                .setPublishDate(post2.getPublishDate().toString())
+                .build();
+
+        BlogPost postDto3 = BlogPost.newBuilder()
+                .setId(Math.toIntExact(post3.getId()))
+                .setSummary(post3.getSummary())
+                .setAuthor(this.userDto)
+                .setStat(statDto3)
+                .setPublishDate(post3.getPublishDate().toString())
+                .build();
+
+        List<BlogPost> postsDto = new ArrayList<>();
+        postsDto.add(postDto);
+        postsDto.add(postDto2);
+        postsDto.add(postDto3);
+
         this.tagDto = BlogTag.newBuilder()
                 .setId(Math.toIntExact(this.tag.getId()))
                 .setName(this.tag.getName())
+                .addAllPosts(postsDto)
                 .build();
 
         BlogTag tagDto2 = BlogTag.newBuilder()
@@ -93,14 +207,27 @@ class BlogTagGrpcServiceImplTest {
         this.tagsDto.add(tagDto2);
         this.tagsDto.add(tagDto3);
 
-        this.post = new Post(
-                user,
-                faker.lorem().word(),
-                faker.lorem().sentence(),
-                true,
-                faker.date().past(1, TimeUnit.DAYS).toInstant()
-        );
-        this.post.setTags(this.tags);
+        BlogTag tagDtoWithoutPost = BlogTag.newBuilder()
+                .setId(Math.toIntExact(this.tag.getId()))
+                .setName(this.tag.getName())
+                .build();
+
+        BlogTag tagDtoWithoutPost2 = BlogTag.newBuilder()
+                .setId(Math.toIntExact(tag2.getId()))
+                .setName(tag2.getName())
+                .build();
+
+        BlogTag tagDtoWithoutPost3 = BlogTag.newBuilder()
+                .setId(Math.toIntExact(tag3.getId()))
+                .setName(tag3.getName())
+                .build();
+
+        this.tagsDtoWithoutPost = new ArrayList<>();
+        this.tagsDtoWithoutPost.add(tagDtoWithoutPost);
+        this.tagsDtoWithoutPost.add(tagDtoWithoutPost2);
+        this.tagsDtoWithoutPost.add(tagDtoWithoutPost3);
+
+        this.tag.setPosts(posts);
     }
 
     @Test
@@ -127,7 +254,7 @@ class BlogTagGrpcServiceImplTest {
 
         assertEquals(HttpStatus.OK.value(), result.getStatusCode());
         assertEquals(0, result.getErrorsCount());
-        assertEquals(this.tagsDto, result.getDataList());
+        assertEquals(this.tagsDtoWithoutPost, result.getDataList());
     }
 
     @Test
@@ -154,7 +281,7 @@ class BlogTagGrpcServiceImplTest {
 
         assertEquals(HttpStatus.OK.value(), result.getStatusCode());
         assertEquals(0, result.getErrorsCount());
-        assertEquals(this.tagsDto, result.getDataList());
+        assertEquals(this.tagsDtoWithoutPost, result.getDataList());
     }
 
     @Test
@@ -181,6 +308,65 @@ class BlogTagGrpcServiceImplTest {
 
         assertEquals(HttpStatus.OK.value(), result.getStatusCode());
         assertEquals(0, result.getErrorsCount());
-        assertEquals(this.tagsDto, result.getDataList());
+        assertEquals(this.tagsDtoWithoutPost, result.getDataList());
     }
+
+    // FIX: GetPosts is null
+
+    @Test
+    public void testFindOneSuccess() throws Exception{
+        Mockito.doReturn(Optional.of(this.tag)).when(this.repository).findById(this.tag.getId());
+        Mockito.doReturn(this.userDto).when(this.userService).findOne(this.user.getUserId());
+
+        FindOneTagRequest req = FindOneTagRequest.newBuilder()
+                .setId(Math.toIntExact(this.tag.getId()))
+                .build();
+
+        StreamRecorder<BlogTagResponse> res = StreamRecorder.create();
+
+        service.findOne(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)) {
+            fail();
+        }
+
+        List<BlogTagResponse> results = res.getValues();
+
+        assertEquals(1, results.size());
+
+        BlogTagResponse result = results.get(0);
+
+        assertEquals(HttpStatus.OK.value(), result.getStatusCode());
+        assertEquals(0, result.getErrorsCount());
+        assertEquals(this.tagDto, result.getData());
+    }
+
+    @Test
+    public void testFindOneNotFound() throws Exception{
+        Mockito.doReturn(Optional.empty()).when(this.repository).findById(this.tag.getId());
+        Mockito.doReturn(this.userDto).when(this.userService).findOne(this.user.getUserId());
+
+        FindOneTagRequest req = FindOneTagRequest.newBuilder()
+                .setId(Math.toIntExact(this.tag.getId()))
+                .build();
+
+        StreamRecorder<BlogTagResponse> res = StreamRecorder.create();
+
+        service.findOne(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)) {
+            fail();
+        }
+
+        List<BlogTagResponse> results = res.getValues();
+
+        assertEquals(1, results.size());
+
+        BlogTagResponse result = results.get(0);
+
+        assertEquals(HttpStatus.NOT_FOUND.value(), result.getStatusCode());
+        assertEquals(1, result.getErrorsCount());
+        assertEquals(BlogTag.newBuilder().build(), result.getData());
+    }
+
 }

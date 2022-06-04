@@ -1,5 +1,6 @@
 package com.samithiwat.post.bloguser;
 
+import com.samithiwat.post.bloguser.entity.BUser;
 import com.samithiwat.post.grpc.bloguser.BlogUserResponse;
 import com.samithiwat.post.grpc.bloguser.BlogUserServiceGrpc;
 import com.samithiwat.post.grpc.bloguser.FindOneUserRequest;
@@ -52,10 +53,10 @@ public class BlogUserServiceImpl implements BlogUserService{
     }
 
     @Override
-    public com.samithiwat.post.bloguser.entity.BlogUser findOneOrCreate(Long userId) {
+    public BUser findOneOrCreate(Long userId) {
         return this.repository.findByUserId(userId)
                 .orElseGet(() -> {
-            com.samithiwat.post.bloguser.entity.BlogUser user = new com.samithiwat.post.bloguser.entity.BlogUser(userId);
+            BUser user = new BUser(userId);
             return this.repository.save(user);
         });
     }

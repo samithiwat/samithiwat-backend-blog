@@ -1,8 +1,9 @@
 package com.samithiwat.post.bloguser;
 
+import com.samithiwat.post.bloguser.entity.BUser;
 import com.samithiwat.post.grpc.dto.BlogUser;
 
 public interface BlogUserService {
     BlogUser findOne(Long id);
-    com.samithiwat.post.bloguser.entity.BlogUser findOneOrCreate(Long userId);
+    BUser findOneOrCreate(Long userId);
 }
