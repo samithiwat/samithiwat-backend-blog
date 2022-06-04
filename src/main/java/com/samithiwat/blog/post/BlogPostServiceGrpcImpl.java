@@ -5,8 +5,10 @@ import com.samithiwat.blog.bloguser.entity.BUser;
 import com.samithiwat.blog.grpc.post.*;
 import com.samithiwat.blog.grpc.common.PaginationMetadata;
 import com.samithiwat.blog.grpc.dto.BlogUser;
+import com.samithiwat.blog.grpc.dto.BlogPost;
 import com.samithiwat.blog.post.entity.Post;
-import com.samithiwat.blog.stat.BlogStatServiceImpl;
+import com.samithiwat.blog.stat.BlogStatGrpcServiceImpl;
+import com.samithiwat.blog.user.UserServiceImpl;
 import io.grpc.stub.StreamObserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -25,9 +27,9 @@ public class BlogPostServiceGrpcImpl extends BlogPostServiceGrpc.BlogPostService
     private BlogUserServiceImpl userService;
 
     @Autowired
-    private BlogStatServiceImpl statService;
+    private BlogStatGrpcServiceImpl statService;
 
-    public BlogPostServiceGrpcImpl(BlogPostRepository repository, BlogUserServiceImpl userService, BlogStatServiceImpl statService) {
+    public BlogPostServiceGrpcImpl(BlogPostRepository repository, BlogUserServiceImpl userService, BlogStatGrpcServiceImpl statService) {
         this.repository = repository;
         this.userService = userService;
         this.statService = statService;
@@ -67,7 +69,7 @@ public class BlogPostServiceGrpcImpl extends BlogPostServiceGrpc.BlogPostService
         for(Post post: blogPostPage.getContent()) {
             BlogUser userDto = this.userService.findOne(post.getAuthor().getUserId());
 
-            com.samithiwat.blog.grpc.dto.BlogPost dto = com.samithiwat.blog.grpc.dto.BlogPost.newBuilder()
+            BlogPost dto = BlogPost.newBuilder()
                     .setId(Math.toIntExact(post.getId()))
                     .setAuthor(userDto)
                     .setSlug(post.getSlug())

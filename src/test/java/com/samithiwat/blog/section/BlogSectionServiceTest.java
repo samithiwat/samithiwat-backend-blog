@@ -39,7 +39,7 @@ public class BlogSectionServiceTest {
     private BlogSectionRepository repository;
 
     @InjectMocks
-    private BlogSectionServiceImpl service;
+    private BlogSectionGrpcServiceImpl service;
 
     private BlogPostSection sectionDto;
     private Optional<BlogSection> section;

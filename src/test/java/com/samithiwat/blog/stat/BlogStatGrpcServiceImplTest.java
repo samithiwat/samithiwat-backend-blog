@@ -32,12 +32,12 @@ import java.util.concurrent.TimeUnit;
 @SpringJUnitConfig(classes = {TestConfig.class})
 @DirtiesContext
 @ExtendWith(SpringExtension.class)
-class BlogStatServiceImplTest {
+class BlogStatGrpcServiceImplTest {
     @Spy
     private BlogStatRepository repository;
 
     @InjectMocks
-    private BlogStatServiceImpl service;
+    private BlogStatGrpcServiceImpl service;
 
     private Optional<BlogStat> stat;
 

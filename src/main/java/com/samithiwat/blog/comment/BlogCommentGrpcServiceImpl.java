@@ -13,14 +13,14 @@ import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
-public class BlogCommentServiceImpl extends BlogCommentServiceGrpc.BlogCommentServiceImplBase {
+public class BlogCommentGrpcServiceImpl extends BlogCommentServiceGrpc.BlogCommentServiceImplBase {
     @Autowired
     BlogCommentRepository repository;
 
     @Autowired
     BlogPostServiceImpl blogPostService;
 
-    public BlogCommentServiceImpl(BlogCommentRepository repository, BlogPostServiceImpl blogPostService){
+    public BlogCommentGrpcServiceImpl(BlogCommentRepository repository, BlogPostServiceImpl blogPostService){
         this.repository = repository;
         this.blogPostService = blogPostService;
     }

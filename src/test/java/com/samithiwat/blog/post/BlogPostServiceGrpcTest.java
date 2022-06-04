@@ -9,7 +9,7 @@ import com.samithiwat.blog.grpc.common.PaginationMetadata;
 import com.samithiwat.blog.grpc.dto.BlogPost;
 import com.samithiwat.blog.grpc.dto.BlogUser;
 import com.samithiwat.blog.post.entity.Post;
-import com.samithiwat.blog.stat.BlogStatServiceImpl;
+import com.samithiwat.blog.stat.BlogStatGrpcServiceImpl;
 import com.samithiwat.blog.stat.entity.BlogStat;
 import io.grpc.internal.testing.StreamRecorder;
 import org.junit.jupiter.api.Assertions;
@@ -17,8 +17,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -46,13 +46,13 @@ import java.util.function.Function;
 @DirtiesContext
 @ExtendWith(SpringExtension.class)
 public class BlogPostServiceGrpcTest {
-    @Spy
-    private BlogStatServiceImpl blogStatService;
+    @Mock
+    private BlogStatGrpcServiceImpl blogStatService;
 
-    @Spy
+    @Mock
     private BlogUserServiceImpl blogUserService;
 
-    @Spy
+    @Mock
     private BlogPostRepository repository;
 
     @InjectMocks
