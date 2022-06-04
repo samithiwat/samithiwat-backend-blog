@@ -31,6 +31,23 @@ public class BUser {
     @OneToMany(mappedBy = "author")
     private List<Post> posts;
 
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "user_post_bookmark",
+            joinColumns = @JoinColumn(name="user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name="post_id", referencedColumnName = "id")
+    )
+    private List<Post> bookmarks;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "user_post_read",
+            joinColumns = @JoinColumn(name="user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name="post_id",referencedColumnName = "id")
+    )
+    private List<Post> reads;
+
+    @Column
+    private String description;
+
     @CreationTimestamp
     private Instant createdDate;
 
@@ -54,6 +71,30 @@ public class BUser {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public List<Post> getBookmarks() {
+        return bookmarks;
+    }
+
+    public void setBookmarks(List<Post> bookmarks) {
+        this.bookmarks = bookmarks;
+    }
+
+    public List<Post> getReads() {
+        return reads;
+    }
+
+    public void setReads(List<Post> reads) {
+        this.reads = reads;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public List<Post> getPosts() {

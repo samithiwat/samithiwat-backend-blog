@@ -7,13 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 
-public class BlogStatServiceImpl extends BlogPostStatServiceGrpc.BlogPostStatServiceImplBase implements BlogStatService {
+public class BlogStatGrpcServiceImpl extends BlogPostStatServiceGrpc.BlogPostStatServiceImplBase implements BlogStatService {
     @Autowired
     BlogStatRepository repository;
 
-    public BlogStatServiceImpl() {}
+    public BlogStatGrpcServiceImpl() {}
 
-    public BlogStatServiceImpl(BlogStatRepository repository) {
+    public BlogStatGrpcServiceImpl(BlogStatRepository repository) {
         this.repository = repository;
     }
 

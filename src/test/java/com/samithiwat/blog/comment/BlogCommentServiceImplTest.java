@@ -45,7 +45,7 @@ class BlogCommentServiceImplTest {
     BlogPostServiceImpl postService;
 
     @InjectMocks
-    BlogCommentServiceImpl service;
+    BlogCommentGrpcServiceImpl service;
 
     private Comment comment;
     private BlogComment commentDto;

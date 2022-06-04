@@ -5,5 +5,5 @@ import com.samithiwat.blog.grpc.dto.BlogUser;
 
 public interface BlogUserService {
     BlogUser findOne(Long id);
-    BUser findOneOrCreate(Long userId);
+    BUser findOneEntity(Long id);
 }

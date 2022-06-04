@@ -10,13 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 
-public class BlogSectionServiceImpl extends BlogPostSectionServiceGrpc.BlogPostSectionServiceImplBase {
+public class BlogSectionGrpcServiceImpl extends BlogPostSectionServiceGrpc.BlogPostSectionServiceImplBase {
     @Autowired
     BlogSectionRepository repository;
 
-    public BlogSectionServiceImpl() {}
+    public BlogSectionGrpcServiceImpl() {}
 
-    public BlogSectionServiceImpl(BlogSectionRepository repository) {
+    public BlogSectionGrpcServiceImpl(BlogSectionRepository repository) {
         this.repository = repository;
     }
 
