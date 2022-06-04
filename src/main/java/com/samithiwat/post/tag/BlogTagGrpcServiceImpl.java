@@ -1,9 +1,10 @@
 package com.samithiwat.post.tag;
 
-import com.samithiwat.post.comment.entity.Comment;
-import com.samithiwat.post.grpc.blogcomment.BlogCommentListResponse;
-import com.samithiwat.post.grpc.dto.BlogComment;
+import com.samithiwat.post.bloguser.BlogUserServiceImpl;
+import com.samithiwat.post.grpc.dto.BlogPost;
+import com.samithiwat.post.grpc.dto.BlogPostStat;
 import com.samithiwat.post.grpc.dto.BlogTag;
+import com.samithiwat.post.grpc.dto.BlogUser;
 import com.samithiwat.post.grpc.tag.*;
 import com.samithiwat.post.post.entity.Post;
 import com.samithiwat.post.tag.entity.Tag;
@@ -12,14 +13,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 
-import java.util.List;
-
 public class BlogTagGrpcServiceImpl extends BlogTagServiceGrpc.BlogTagServiceImplBase {
     @Autowired
     BlogTagRepository repository;
 
-    public BlogTagGrpcServiceImpl(BlogTagRepository repository) {
+    @Autowired
+    BlogUserServiceImpl userService;
+
+    public BlogTagGrpcServiceImpl(BlogTagRepository repository, BlogUserServiceImpl userService) {
         this.repository = repository;
+        this.userService = userService;
     }
 
     @Override
@@ -27,7 +30,6 @@ public class BlogTagGrpcServiceImpl extends BlogTagServiceGrpc.BlogTagServiceImp
         BlogTagListResponse.Builder res = BlogTagListResponse.newBuilder();
 
         Sort sort = switch (request.getSortType()){
-            case ALPHABET_ASC -> Sort.by(Sort.Direction.ASC, "name");
             case ALPHABET_DESC -> Sort.by(Sort.Direction.DESC, "name");
             default -> Sort.by(Sort.Direction.ASC, "name");
         };
@@ -51,12 +53,54 @@ public class BlogTagGrpcServiceImpl extends BlogTagServiceGrpc.BlogTagServiceImp
 
     @Override
     public void findOne(FindOneTagRequest request, StreamObserver<BlogTagResponse> responseObserver) {
-        super.findOne(request, responseObserver);
+        BlogTagResponse.Builder res = BlogTagResponse.newBuilder();
+
+        Tag tag = this.repository.findById((long) request.getId()).orElse(null);
+
+        if(tag == null){
+            res.setStatusCode(HttpStatus.NOT_FOUND.value())
+                    .addErrors("Not found tag");
+
+            responseObserver.onNext(res.build());
+            responseObserver.onCompleted();
+            return;
+        }
+
+        BlogTag.Builder result = BlogTag.newBuilder()
+                .setId(Math.toIntExact(tag.getId()))
+                .setName(tag.getName());
+
+        for (Post post: tag.getPosts()) {
+            BlogUser u = this.userService.findOne(post.getAuthor().getUserId());
+
+            BlogPostStat s = BlogPostStat.newBuilder()
+                    .setViews(Math.toIntExact(post.getStat().getViews()))
+                    .setLikes(Math.toIntExact(post.getStat().getLikes()))
+                    .setShares(Math.toIntExact(post.getStat().getShares()))
+                    .build();
+
+            BlogPost p = BlogPost.newBuilder()
+                    .setId(Math.toIntExact(post.getId()))
+                    .setSummary(post.getSummary())
+                    .setStat(s)
+                    .setAuthor(u)
+                    .setPublishDate(post.getPublishDate().toString())
+                    .build();
+
+            result.addPosts(p);
+        }
+
+
+        res.setStatusCode(HttpStatus.OK.value())
+                .setData(result.build());
+
+        responseObserver.onNext(res.build());
+        responseObserver.onCompleted();
     }
 
     @Override
     public void create(CreateTagRequest request, StreamObserver<BlogTagResponse> responseObserver) {
-        super.create(request, responseObserver);
+
     }
 
     @Override
