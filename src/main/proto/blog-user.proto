@@ -5,7 +5,7 @@ package blog_user;
 import "dto.proto";
 
 option java_multiple_files = true;
-option java_package = "com.samithiwat.post.grpc.bloguser";
+option java_package = "com.samithiwat.blog.grpc.bloguser";
 option java_outer_classname = "BlogUser";
 
 service BlogUserService{
