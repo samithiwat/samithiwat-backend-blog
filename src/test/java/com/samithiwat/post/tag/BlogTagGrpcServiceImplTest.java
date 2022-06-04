@@ -422,4 +422,60 @@ class BlogTagGrpcServiceImplTest {
         assertEquals(1, result.getErrorsCount());
         assertEquals(BlogTag.newBuilder().build(), result.getData());
     }
+
+    @Test
+    public void testUpdateSuccess() throws Exception{
+        Mockito.doReturn(true).when(this.repository).update(this.tag.getId(), this.tag.getName());
+
+        UpdateTagRequest req = UpdateTagRequest.newBuilder()
+                .setId(Math.toIntExact(this.tag.getId()))
+                .setName(this.tag.getName())
+                .build();
+
+        StreamRecorder<BlogTagStatusResponse> res = StreamRecorder.create();
+
+        service.update(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)) {
+            fail();
+        }
+
+        List<BlogTagStatusResponse> results = res.getValues();
+
+        assertEquals(1, results.size());
+
+        BlogTagStatusResponse result = results.get(0);
+
+        assertEquals(HttpStatus.OK.value(), result.getStatusCode());
+        assertEquals(0, result.getErrorsCount());
+        assertTrue(result.getData());
+    }
+
+    @Test
+    public void testUpdateNotFoundTag() throws Exception{
+        Mockito.doReturn(false).when(this.repository).update(this.tag.getId(), this.tag.getName());
+
+        UpdateTagRequest req = UpdateTagRequest.newBuilder()
+                .setId(Math.toIntExact(this.tag.getId()))
+                .setName(this.tag.getName())
+                .build();
+
+        StreamRecorder<BlogTagStatusResponse> res = StreamRecorder.create();
+
+        service.update(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)) {
+            fail();
+        }
+
+        List<BlogTagStatusResponse> results = res.getValues();
+
+        assertEquals(1, results.size());
+
+        BlogTagStatusResponse result = results.get(0);
+
+        assertEquals(HttpStatus.NOT_FOUND.value(), result.getStatusCode());
+        assertEquals(1, result.getErrorsCount());
+        assertFalse(result.getData());
+    }
 }
