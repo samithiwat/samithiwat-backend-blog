@@ -6,6 +6,7 @@ target/
 
 ### Application ###
 application-dev.properties
+application-local.properties
 application-prod.properties
 .env.*
 volumes
