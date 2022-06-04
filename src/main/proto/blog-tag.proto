@@ -12,7 +12,7 @@ service BlogTagService{
   rpc findAll(FindAllTagRequest) returns (BlogTagListResponse) {}
   rpc findOne(FindOneTagRequest) returns(BlogTagResponse){} // return with posts
   rpc create(CreateTagRequest) returns (BlogTagResponse) {}
-  rpc update(UpdateTagRequest) returns (BlogTagResponse) {}
+  rpc update(UpdateTagRequest) returns (BlogTagStatusResponse) {}
   rpc delete(DeleteTagRequest) returns (BlogTagStatusResponse) {}
 }
 
