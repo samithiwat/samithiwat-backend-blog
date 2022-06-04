@@ -11,6 +11,7 @@ import com.samithiwat.post.tag.entity.Tag;
 import io.grpc.stub.StreamObserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 
@@ -151,6 +152,22 @@ public class BlogTagGrpcServiceImpl extends BlogTagServiceGrpc.BlogTagServiceImp
 
     @Override
     public void delete(DeleteTagRequest request, StreamObserver<BlogTagStatusResponse> responseObserver) {
-        super.delete(request, responseObserver);
+        BlogTagStatusResponse.Builder res = BlogTagStatusResponse.newBuilder();
+
+        try{
+            this.repository.deleteById((long) request.getId());
+            res.setStatusCode(HttpStatus.OK.value())
+                    .setData(true);
+
+            responseObserver.onNext(res.build());
+            responseObserver.onCompleted();
+        }catch(EmptyResultDataAccessException err){
+            res.setStatusCode(HttpStatus.NOT_FOUND.value())
+                    .addErrors("Not found tag")
+                    .setData(false);
+
+            responseObserver.onNext(res.build());
+            responseObserver.onCompleted();
+        }
     }
 }
