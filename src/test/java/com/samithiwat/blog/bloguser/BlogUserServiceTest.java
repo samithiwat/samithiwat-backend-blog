@@ -55,11 +55,10 @@ public class BlogUserServiceTest{
     private User userDto;
 
     private BUser user;
-    private Faker faker;
 
     @BeforeEach
     void setup(){
-        this.faker = new Faker();
+        Faker faker = new Faker();
 
         this.user = new BUser(1L);
         this.user.setId(1L);
@@ -102,19 +101,19 @@ public class BlogUserServiceTest{
         Mockito.doReturn(Optional.of(this.user)).when(this.repository).findById(this.user.getId());
         Mockito.doReturn(null).when(this.userService).findOne(this.user.getUserId());
 
-        Assertions.assertNull(service.findOneEntity(this.user.getId()));
+        Assertions.assertNull(service.findOne(this.user.getId()));
     }
 
     @Test
     public void testFindOneEntitySuccess(){
-        Mockito.doReturn(Optional.of(this.user)).when(this.repository).findByUserId(1L);
+        Mockito.doReturn(Optional.of(this.user)).when(this.repository).findById(this.user.getId());
 
         Assertions.assertEquals(this.user, service.findOneEntity(this.user.getId()));
     }
 
     @Test
     public void testFindOneEntityNotFound(){
-        Mockito.doReturn(Optional.empty()).when(this.repository).findByUserId(1L);
+        Mockito.doReturn(Optional.empty()).when(this.repository).findById(1L);
 
         Assertions.assertNull(service.findOneEntity(this.user.getId()));
     }
