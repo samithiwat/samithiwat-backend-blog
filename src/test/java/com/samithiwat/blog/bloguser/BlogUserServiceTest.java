@@ -8,6 +8,8 @@ import com.samithiwat.blog.grpc.bloguser.BlogUserResponse;
 import com.samithiwat.blog.grpc.bloguser.BlogUserServiceGrpc;
 import com.samithiwat.blog.grpc.bloguser.FindOneUserRequest;
 import com.samithiwat.blog.grpc.dto.BlogUser;
+import com.samithiwat.blog.grpc.dto.User;
+import com.samithiwat.blog.user.UserServiceImpl;
 import io.grpc.ManagedChannel;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
@@ -18,6 +20,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,99 +40,77 @@ import java.util.Optional;
 @SpringJUnitConfig(classes = {TestConfig.class})
 @DirtiesContext
 @ExtendWith(SpringExtension.class)
-public class BlogUserServiceTest {
-    @Rule
-    public final GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
-
-    @Spy
+public class BlogUserServiceTest{
+    @Mock
     private BlogUserRepository repository;
 
-    private BlogUser userDto;
-    private Optional<BUser> user;
+    @Mock
+    private UserServiceImpl userService;
+
+    @InjectMocks
+    private BlogUserServiceImpl service;
+
+    private BlogUser blogUserDto;
+
+    private User userDto;
+
+    private BUser user;
     private Faker faker;
 
     @BeforeEach
     void setup(){
         this.faker = new Faker();
 
-        this.user = Optional.of(new BUser(1l));
+        this.user = new BUser(1L);
+        this.user.setId(1L);
+        this.user.setDescription(faker.lorem().paragraph());
 
-        this.userDto = BlogUser.newBuilder()
-                .setId(1)
+        this.userDto = User.newBuilder()
+                .setId(Math.toIntExact(this.user.getUserId()))
                 .setFirstname(faker.name().firstName())
                 .setLastname(faker.name().lastName())
                 .setDisplayName(faker.name().username())
+                .build();
+
+        this.blogUserDto = BlogUser.newBuilder()
+                .setId(Math.toIntExact(this.user.getId()))
+                .setFirstname(this.userDto.getFirstname())
+                .setLastname(this.userDto.getLastname())
+                .setDisplayName(this.userDto.getDisplayName())
+                .setDescription(this.user.getDescription())
                 .build();
     }
 
     @Test
     public void testFindOneSuccess(){
-        BlogUserServiceGrpc.BlogUserServiceImplBase userService = new BlogUserServiceGrpc.BlogUserServiceImplBase() {
-            @Override
-            public void findOne(FindOneUserRequest request, StreamObserver<BlogUserResponse> responseObserver) {
-                BlogUserResponse res = BlogUserResponse.newBuilder()
-                        .setStatusCode(HttpStatus.OK.value())
-                        .setData(userDto)
-                        .build();
+        Mockito.doReturn(Optional.of(this.user)).when(this.repository).findById(this.user.getId());
+        Mockito.doReturn(this.userDto).when(this.userService).findOne(this.user.getUserId());
 
-                responseObserver.onNext(res);
-                responseObserver.onCompleted();
-            }
-        };
-
-        try{
-            grpcCleanup.register(InProcessServerBuilder.forName("user-service-test-findOne-success").directExecutor().addService(userService).build().start());
-        }catch(Exception err){
-            System.out.println("Error occurs while generating testing service");
-            System.out.println(err.getMessage());
-        }
-
-        ManagedChannel chan = grpcCleanup.register(InProcessChannelBuilder.forName("user-service-test-findOne-success").directExecutor().build());
-        BlogUserServiceGrpc.BlogUserServiceBlockingStub userBlockingStub = BlogUserServiceGrpc.newBlockingStub(chan);
-        BlogUserServiceImpl service = new BlogUserServiceImpl(userBlockingStub);
-
-        Assertions.assertEquals(this.userDto, service.findOne(1l));
+        Assertions.assertEquals(this.blogUserDto, service.findOne(this.user.getId()));
     }
 
     @Test
-    public void testFindOneNotFound(){
-        BlogUserServiceGrpc.BlogUserServiceImplBase userService = new BlogUserServiceGrpc.BlogUserServiceImplBase() {
-            @Override
-            public void findOne(FindOneUserRequest request, StreamObserver<BlogUserResponse> responseObserver) {
-                BlogUserResponse res = BlogUserResponse.newBuilder()
-                        .setStatusCode(HttpStatus.NOT_FOUND.value())
-                        .addErrors("Not found user")
-                        .build();
+    public void testFindOneNotFoundBUser(){
+        Mockito.doReturn(Optional.empty()).when(this.repository).findById(this.user.getId());
+        Mockito.doReturn(this.userDto).when(this.userService).findOne(this.user.getUserId());
 
-                responseObserver.onNext(res);
-                responseObserver.onCompleted();
-            }
-        };
+        Assertions.assertNull(service.findOne(this.user.getId()));
+    }
 
-        try{
-            grpcCleanup.register(InProcessServerBuilder.forName("user-service-test-findOne-notfound").directExecutor().addService(userService).build().start());
-        }catch(Exception err){
-            System.out.println("Error occurs while generating testing service");
-            System.out.println(err.getMessage());
-        }
+    @Test
+    public void testFIndOneNOtFoundUserFromSamithiwatBackend(){
+        Mockito.doReturn(Optional.of(this.user)).when(this.repository).findById(this.user.getId());
+        Mockito.doReturn(null).when(this.userService).findOne(this.user.getUserId());
 
-        ManagedChannel chan = grpcCleanup.register(InProcessChannelBuilder.forName("user-service-test-findOne-notfound").directExecutor().build());
-        BlogUserServiceGrpc.BlogUserServiceBlockingStub userBlockingStub = BlogUserServiceGrpc.newBlockingStub(chan);
-        BlogUserServiceImpl service = new BlogUserServiceImpl(userBlockingStub);
-
-        Assertions.assertNull(service.findOne(1l));
+        Assertions.assertNull(service.findOne(this.user.getId()));
     }
 
     @Test
     public void testFindOneOrCreateFounded(){
-        Mockito.doReturn(this.user).when(this.repository).findByUserId(1L);
-        Mockito.doReturn(this.user.get()).when(this.repository).save(Mockito.any());
+        Mockito.doReturn(Optional.of(this.user)).when(this.repository).findByUserId(1L);
+        Mockito.doReturn(this.user).when(this.repository).save(Mockito.any());
 
-        BlogUserServiceImpl service = new BlogUserServiceImpl(this.repository);
-
-        BUser user = service.findOneOrCreate(1L);
-
-        Assertions.assertEquals(this.user.get(), user);
+        Assertions.assertEquals(this.user, service.findOneOrCreate(this.user.getId()));
 
         Mockito.verify(this.repository, Mockito.times(1)).findByUserId(1L);
         Mockito.verify(this.repository, Mockito.times(0)).save(Mockito.any());
@@ -137,13 +119,12 @@ public class BlogUserServiceTest {
     @Test
     public void testFindOneOrCreateNotFound(){
         Mockito.doReturn(Optional.empty()).when(this.repository).findByUserId(1L);
-        Mockito.doReturn(this.user.get()).when(this.repository).save(Mockito.any());
+        Mockito.doReturn(this.user).when(this.repository).save(Mockito.any());
 
-        BlogUserServiceImpl service = new BlogUserServiceImpl(this.repository);
 
         BUser user = service.findOneOrCreate(1L);
 
-        Assertions.assertEquals(this.user.get(), user);
+        Assertions.assertEquals(this.user, user);
 
         Mockito.verify(this.repository, Mockito.times(1)).findByUserId(1L);
         Mockito.verify(this.repository, Mockito.times(1)).save(Mockito.any());
