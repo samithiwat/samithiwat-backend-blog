@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
@@ -463,6 +464,60 @@ class BlogTagGrpcServiceImplTest {
         StreamRecorder<BlogTagStatusResponse> res = StreamRecorder.create();
 
         service.update(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)) {
+            fail();
+        }
+
+        List<BlogTagStatusResponse> results = res.getValues();
+
+        assertEquals(1, results.size());
+
+        BlogTagStatusResponse result = results.get(0);
+
+        assertEquals(HttpStatus.NOT_FOUND.value(), result.getStatusCode());
+        assertEquals(1, result.getErrorsCount());
+        assertFalse(result.getData());
+    }
+
+    @Test
+    public void testDeleteSuccess() throws Exception{
+        Mockito.doNothing().when(this.repository).deleteById(this.tag.getId());
+
+        DeleteTagRequest req = DeleteTagRequest.newBuilder()
+                .setId(Math.toIntExact(this.tag.getId()))
+                .build();
+
+        StreamRecorder<BlogTagStatusResponse> res = StreamRecorder.create();
+
+        service.delete(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)) {
+            fail();
+        }
+
+        List<BlogTagStatusResponse> results = res.getValues();
+
+        assertEquals(1, results.size());
+
+        BlogTagStatusResponse result = results.get(0);
+
+        assertEquals(HttpStatus.OK.value(), result.getStatusCode());
+        assertEquals(0, result.getErrorsCount());
+        assertTrue(result.getData());
+    }
+
+    @Test
+    public void testDeleteNotFound() throws Exception{
+        Mockito.doThrow(new EmptyResultDataAccessException("Not found tag", 1)).when(this.repository).deleteById(this.tag.getId());
+
+        DeleteTagRequest req = DeleteTagRequest.newBuilder()
+                .setId(Math.toIntExact(this.tag.getId()))
+                .build();
+
+        StreamRecorder<BlogTagStatusResponse> res = StreamRecorder.create();
+
+        service.delete(req, res);
 
         if (!res.awaitCompletion(5, TimeUnit.SECONDS)) {
             fail();
