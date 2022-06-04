@@ -7,6 +7,13 @@ option java_multiple_files = true;
 option java_package = "com.samithiwat.post.grpc.dto";
 option java_outer_classname = "Dto";
 
+enum SortByType{
+  ALPHABET_ASC = 0;
+  ALPHABET_DESC = 1;
+  ID_ASC = 2;
+  ID_DESC = 3;
+}
+
 enum StatCountType {
   VIEW_INCREASE = 0;
   LIKE_INCREASE = 1;
@@ -144,4 +151,10 @@ message BlogComment{
   uint32 likes = 4;
   string createdDate = 5;
   string updatedDate = 6;
+}
+
+message BlogTag{
+  uint32 id = 1;
+  string name = 2;
+  repeated BlogPost posts = 3;
 }

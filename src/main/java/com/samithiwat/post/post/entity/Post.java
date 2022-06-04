@@ -1,15 +1,17 @@
 package com.samithiwat.post.post.entity;
 
-import com.samithiwat.post.bloguser.entity.BlogUser;
+import com.samithiwat.post.bloguser.entity.BUser;
 import com.samithiwat.post.comment.entity.Comment;
 import com.samithiwat.post.section.entity.BlogSection;
 import com.samithiwat.post.stat.entity.BlogStat;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.annotations.Where;
+import com.samithiwat.post.tag.entity.Tag;
+import org.hibernate.annotations.*;
 
 import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Index;
+import javax.persistence.Table;
 import java.time.Instant;
 import java.util.List;
 
@@ -20,7 +22,7 @@ import java.util.List;
 public class Post {
     public Post() {}
 
-    public Post(BlogUser author, String slug, String summary, Boolean isPublished, Instant publishDate) {
+    public Post(BUser author, String slug, String summary, Boolean isPublished, Instant publishDate) {
         this.setAuthor(author);
         this.setSlug(slug);
         this.setSummary(summary);
@@ -32,7 +34,8 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "post")
+    @Fetch(value = FetchMode.SUBSELECT)
     private List<Comment> comments;
 
     @OneToOne(mappedBy = "post", cascade = CascadeType.REMOVE)
@@ -40,10 +43,18 @@ public class Post {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
-    private BlogUser author;
+    private BUser author;
 
-    @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "post")
+    @Fetch(value = FetchMode.SUBSELECT)
     private List<BlogSection> sections;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "post_tag",
+            joinColumns = @JoinColumn(name="post_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name="tag_id",referencedColumnName = "id")
+    )
+    private List<Tag> tags;
 
     @Column(unique = true)
     private String slug;
@@ -82,11 +93,19 @@ public class Post {
         this.stat = stat;
     }
 
-    public BlogUser getAuthor() {
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
+    }
+
+    public BUser getAuthor() {
         return author;
     }
 
-    public void setAuthor(BlogUser author) {
+    public void setAuthor(BUser author) {
         this.author = author;
     }
 

@@ -14,10 +14,10 @@ import java.util.List;
 @Table(name = "user")
 @SQLDelete(sql = "UPDATE user SET deletedDate = CURRENT_DATE WHERE id = ?")
 @Where(clause = "deletedDate IS NULL")
-public class BlogUser {
-    public BlogUser() {}
+public class BUser {
+    public BUser() {}
 
-    public BlogUser(Long userId) {
+    public BUser(Long userId) {
         this.userId = userId;
     }
 

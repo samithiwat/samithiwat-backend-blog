@@ -2,7 +2,7 @@ package com.samithiwat.post.post;
 
 import com.github.javafaker.Faker;
 import com.samithiwat.post.TestConfig;
-import com.samithiwat.post.bloguser.entity.BlogUser;
+import com.samithiwat.post.bloguser.entity.BUser;
 import com.samithiwat.post.post.entity.Post;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +40,7 @@ public class BlogPostServiceTest {
     void setup(){
         Faker faker = new Faker();
 
-        BlogUser user = new BlogUser();
+        BUser user = new BUser();
         user.setId(1L);
         user.setUserId(1L);
 

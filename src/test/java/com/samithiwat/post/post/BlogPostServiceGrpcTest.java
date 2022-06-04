@@ -3,6 +3,7 @@ package com.samithiwat.post.post;
 import com.github.javafaker.Faker;
 import com.samithiwat.post.TestConfig;
 import com.samithiwat.post.bloguser.BlogUserServiceImpl;
+import com.samithiwat.post.bloguser.entity.BUser;
 import com.samithiwat.post.grpc.blogpost.*;
 import com.samithiwat.post.grpc.common.PaginationMetadata;
 import com.samithiwat.post.grpc.dto.BlogPost;
@@ -62,7 +63,7 @@ public class BlogPostServiceGrpcTest {
     private List<Post> posts;
     private Optional<Post> post;
     private BlogUser userDto;
-    private com.samithiwat.post.bloguser.entity.BlogUser user;
+    private BUser user;
     private BlogStat stat;
 
     @BeforeEach
@@ -70,7 +71,7 @@ public class BlogPostServiceGrpcTest {
         Faker faker = new Faker();
 
         this.stat = new BlogStat(1L);
-        this.user = new com.samithiwat.post.bloguser.entity.BlogUser();
+        this.user = new BUser();
         user.setId(1L);
         user.setUserId(1L);
 
