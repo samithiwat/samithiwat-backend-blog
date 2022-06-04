@@ -5,10 +5,8 @@ import com.samithiwat.post.TestConfig;
 import com.samithiwat.post.bloguser.BlogUserServiceImpl;
 import com.samithiwat.post.bloguser.entity.BUser;
 import com.samithiwat.post.grpc.dto.*;
-import com.samithiwat.post.grpc.tag.BlogTagListResponse;
-import com.samithiwat.post.grpc.tag.BlogTagResponse;
-import com.samithiwat.post.grpc.tag.FindAllTagRequest;
-import com.samithiwat.post.grpc.tag.FindOneTagRequest;
+import com.samithiwat.post.grpc.dto.BlogTag;
+import com.samithiwat.post.grpc.tag.*;
 import com.samithiwat.post.post.entity.Post;
 import com.samithiwat.post.stat.entity.BlogStat;
 import com.samithiwat.post.tag.entity.Tag;
@@ -20,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
@@ -54,6 +53,7 @@ class BlogTagGrpcServiceImplTest {
     private Tag tag;
     private List<Tag> tags;
     private BlogTag tagDto;
+    private BlogTag tagDtoWithoutPost;
     private List<BlogTag> tagsDto;
     private List<BlogTag> tagsDtoWithoutPost;
     private Post post;
@@ -207,7 +207,7 @@ class BlogTagGrpcServiceImplTest {
         this.tagsDto.add(tagDto2);
         this.tagsDto.add(tagDto3);
 
-        BlogTag tagDtoWithoutPost = BlogTag.newBuilder()
+        this.tagDtoWithoutPost = BlogTag.newBuilder()
                 .setId(Math.toIntExact(this.tag.getId()))
                 .setName(this.tag.getName())
                 .build();
@@ -223,7 +223,7 @@ class BlogTagGrpcServiceImplTest {
                 .build();
 
         this.tagsDtoWithoutPost = new ArrayList<>();
-        this.tagsDtoWithoutPost.add(tagDtoWithoutPost);
+        this.tagsDtoWithoutPost.add(this.tagDtoWithoutPost);
         this.tagsDtoWithoutPost.add(tagDtoWithoutPost2);
         this.tagsDtoWithoutPost.add(tagDtoWithoutPost3);
 
@@ -369,4 +369,57 @@ class BlogTagGrpcServiceImplTest {
         assertEquals(BlogTag.newBuilder().build(), result.getData());
     }
 
+    @Test
+    public void testCreateSuccess() throws Exception{
+        Mockito.doReturn(this.tag).when(this.repository).save(Mockito.any());
+
+        CreateTagRequest req = CreateTagRequest.newBuilder()
+                .setName(this.tag.getName())
+                .build();
+
+        StreamRecorder<BlogTagResponse> res = StreamRecorder.create();
+
+        service.create(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)) {
+            fail();
+        }
+
+        List<BlogTagResponse> results = res.getValues();
+
+        assertEquals(1, results.size());
+
+        BlogTagResponse result = results.get(0);
+
+        assertEquals(HttpStatus.CREATED.value(), result.getStatusCode());
+        assertEquals(0, result.getErrorsCount());
+        assertEquals(this.tagDtoWithoutPost, result.getData());
+    }
+
+    @Test
+    public void testCreateDuplicatedName() throws Exception{
+        Mockito.doThrow(new DataIntegrityViolationException("Duplicated name")).when(this.repository).save(Mockito.any());
+
+        CreateTagRequest req = CreateTagRequest.newBuilder()
+                .setName(this.tag.getName())
+                .build();
+
+        StreamRecorder<BlogTagResponse> res = StreamRecorder.create();
+
+        service.create(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)) {
+            fail();
+        }
+
+        List<BlogTagResponse> results = res.getValues();
+
+        assertEquals(1, results.size());
+
+        BlogTagResponse result = results.get(0);
+
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY.value(), result.getStatusCode());
+        assertEquals(1, result.getErrorsCount());
+        assertEquals(BlogTag.newBuilder().build(), result.getData());
+    }
 }
