@@ -6,10 +6,13 @@ import com.samithiwat.blog.grpc.dto.BlogPostSection;
 import com.samithiwat.blog.grpc.dto.PostContentType;
 import com.samithiwat.blog.section.entity.BlogSection;
 import io.grpc.stub.StreamObserver;
+import net.devh.boot.grpc.server.service.GrpcService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
 
+@GrpcService
 public class BlogSectionGrpcServiceImpl extends BlogPostSectionServiceGrpc.BlogPostSectionServiceImplBase {
     @Autowired
     BlogSectionRepository repository;
@@ -77,10 +80,11 @@ public class BlogSectionGrpcServiceImpl extends BlogPostSectionServiceGrpc.BlogP
     }
 
     @Override
+    @Transactional
     public void update(UpdatePostSectionRequest request, StreamObserver<BlogPostSectionStatusResponse> responseObserver) {
         BlogPostSectionStatusResponse.Builder res = BlogPostSectionStatusResponse.newBuilder();
 
-        boolean isUpdated = this.repository.update(request.getId(), request.getPos(), request.getContent());
+        boolean isUpdated = this.repository.update(request.getId(), request.getPos(), request.getContent()) > 0;
 
         if(!isUpdated) {
 

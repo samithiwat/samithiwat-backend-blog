@@ -549,7 +549,7 @@ public class BlogPostServiceGrpcTest {
 
     @Test
     public void testUpdateSuccess() throws Exception {
-        Mockito.doReturn(true).when(this.repository).update(1, this.postDto.getSlug(), this.postDto.getSummary(), this.postDto.getIsPublish(), Instant.parse(this.postDto.getPublishDate()));
+        Mockito.doReturn(1).when(this.repository).update(1, this.postDto.getSlug(), this.postDto.getSummary(), this.postDto.getIsPublish(), Instant.parse(this.postDto.getPublishDate()));
 
         UpdatePostRequest req = UpdatePostRequest.newBuilder()
                 .setId(1)
@@ -580,7 +580,7 @@ public class BlogPostServiceGrpcTest {
 
     @Test
     public void testUpdateNotFoundPost() throws Exception {
-        Mockito.doReturn(false).when(this.repository).update(1, this.postDto.getSlug(), this.postDto.getSummary(), this.postDto.getIsPublish(), Instant.parse(this.postDto.getPublishDate()));
+        Mockito.doReturn(0).when(this.repository).update(1, this.postDto.getSlug(), this.postDto.getSummary(), this.postDto.getIsPublish(), Instant.parse(this.postDto.getPublishDate()));
 
         UpdatePostRequest req = UpdatePostRequest.newBuilder()
                 .setId(1)

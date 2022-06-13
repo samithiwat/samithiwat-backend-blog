@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class GrpcConfig {
 
-    @GrpcClient("UserService")
+    @GrpcClient("userservice")
     UserServiceGrpc.UserServiceBlockingStub userClient;
 
     @Bean

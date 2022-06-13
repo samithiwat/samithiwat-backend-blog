@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserServiceImpl implements UserService{
 
-    @GrpcClient("UserService")
+    @GrpcClient("userservice")
     private final UserServiceGrpc.UserServiceBlockingStub userService;
 
     public UserServiceImpl(UserServiceGrpc.UserServiceBlockingStub userServiceBlockingStub) {

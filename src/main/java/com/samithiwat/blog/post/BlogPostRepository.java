@@ -18,5 +18,5 @@ public interface BlogPostRepository extends CrudRepository<Post, Long>, PagingAn
 
     @Modifying
     @Query("UPDATE Post p SET p.slug = :slug, p.summary = :summary, p.isPublished = :isPublished, p.publishDate = :publishDate WHERE p.id = :id")
-    boolean update(@Param("id") int id, @Param("slug") String slug, @Param("summary") String summary, @Param("isPublish") boolean isPublish, @Param("publishDate") Instant publishDate);
+    int update(@Param("id") int id, @Param("slug") String slug, @Param("summary") String summary, @Param("isPublish") boolean isPublish, @Param("publishDate") Instant publishDate);
 }

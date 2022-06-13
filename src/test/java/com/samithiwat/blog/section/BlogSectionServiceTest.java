@@ -145,7 +145,7 @@ public class BlogSectionServiceTest {
 
     @Test
     public void testUpdateSuccess() throws Exception{
-        Mockito.doReturn(true).when(this.repository).update(1, this.sectionDto.getPos(), this.sectionDto.getContent());
+        Mockito.doReturn(1).when(this.repository).update(1, this.sectionDto.getPos(), this.sectionDto.getContent());
 
         UpdatePostSectionRequest req = UpdatePostSectionRequest.newBuilder()
                 .setId(1)
@@ -174,7 +174,7 @@ public class BlogSectionServiceTest {
 
     @Test
     public void testUpdateNotFound() throws Exception {
-        Mockito.doReturn(false).when(this.repository).update(1, this.sectionDto.getPos(), this.sectionDto.getContent());
+        Mockito.doReturn(0).when(this.repository).update(1, this.sectionDto.getPos(), this.sectionDto.getContent());
 
 
         UpdatePostSectionRequest req = UpdatePostSectionRequest.newBuilder()

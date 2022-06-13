@@ -9,17 +9,17 @@ import org.springframework.data.repository.query.Param;
 public interface BlogStatRepository extends CrudRepository<BlogStat, Long> {
     @Modifying
     @Query("UPDATE BlogStat s SET s.likes = s.likes + 1 WHERE s.id = :id")
-    boolean increaseLike(@Param("id") Long id);
+    int increaseLike(@Param("id") Long id);
 
     @Modifying
     @Query("UPDATE BlogStat s SET s.likes = s.likes - 1 WHERE s.id = :id")
-    boolean decreaseLike(@Param("id") Long id);
+    int decreaseLike(@Param("id") Long id);
 
     @Modifying
     @Query("UPDATE BlogStat s SET s.views = s.views + 1 WHERE s.id = :id")
-    boolean increaseView(@Param("id") Long id);
+    int increaseView(@Param("id") Long id);
 
     @Modifying
     @Query("UPDATE BlogStat s SET s.shares = s.shares + 1 WHERE s.id = :id")
-    boolean increaseShare(@Param("id") Long id);
+    int increaseShare(@Param("id") Long id);
 }

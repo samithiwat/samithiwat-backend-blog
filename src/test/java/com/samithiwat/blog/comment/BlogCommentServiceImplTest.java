@@ -306,7 +306,7 @@ class BlogCommentServiceImplTest {
 
     @Test
     public void testUpdateLikeIncreaseSuccess() throws Exception{
-        Mockito.doReturn(true).when(this.repository).increaseLike(this.comment.getId());
+        Mockito.doReturn(1).when(this.repository).increaseLike(this.comment.getId());
 
         UpdateCommentLikeRequest req = UpdateCommentLikeRequest.newBuilder()
                 .setId(Math.toIntExact(this.comment.getId()))
@@ -334,7 +334,7 @@ class BlogCommentServiceImplTest {
 
     @Test
     public void testUpdateLikeIncreaseNotFoundComment() throws Exception{
-        Mockito.doReturn(false).when(this.repository).decreaseLike(this.comment.getId());
+        Mockito.doReturn(0).when(this.repository).decreaseLike(this.comment.getId());
 
         UpdateCommentLikeRequest req = UpdateCommentLikeRequest.newBuilder()
                 .setId(Math.toIntExact(this.comment.getId()))
@@ -362,7 +362,7 @@ class BlogCommentServiceImplTest {
 
     @Test
     public void testUpdateLikeDecreaseSuccess() throws Exception{
-        Mockito.doReturn(true).when(this.repository).decreaseLike(this.comment.getId());
+        Mockito.doReturn(1).when(this.repository).decreaseLike(this.comment.getId());
 
         UpdateCommentLikeRequest req = UpdateCommentLikeRequest.newBuilder()
                 .setId(Math.toIntExact(this.comment.getId()))
@@ -390,7 +390,7 @@ class BlogCommentServiceImplTest {
 
     @Test
     public void testUpdateLikeDecreaseNotFoundComment() throws Exception{
-        Mockito.doReturn(false).when(this.repository).decreaseLike(this.comment.getId());
+        Mockito.doReturn(0).when(this.repository).decreaseLike(this.comment.getId());
 
         UpdateCommentLikeRequest req = UpdateCommentLikeRequest.newBuilder()
                 .setId(Math.toIntExact(this.comment.getId()))
@@ -418,7 +418,7 @@ class BlogCommentServiceImplTest {
 
     @Test
     public void testUpdateLikeInvalidType() throws Exception{
-        Mockito.doReturn(true).when(this.repository).decreaseLike(this.comment.getId());
+        Mockito.doReturn(1).when(this.repository).decreaseLike(this.comment.getId());
 
         UpdateCommentLikeRequest req = UpdateCommentLikeRequest.newBuilder()
                 .setId(Math.toIntExact(this.comment.getId()))

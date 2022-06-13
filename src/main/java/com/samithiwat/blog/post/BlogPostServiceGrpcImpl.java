@@ -9,15 +9,18 @@ import com.samithiwat.blog.grpc.dto.BlogPost;
 import com.samithiwat.blog.post.entity.Post;
 import com.samithiwat.blog.stat.BlogStatGrpcServiceImpl;
 import io.grpc.stub.StreamObserver;
+import net.devh.boot.grpc.server.service.GrpcService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
+@GrpcService
 public class BlogPostServiceGrpcImpl extends BlogPostServiceGrpc.BlogPostServiceImplBase {
     @Autowired
     private BlogPostRepository repository;
@@ -217,11 +220,12 @@ public class BlogPostServiceGrpcImpl extends BlogPostServiceGrpc.BlogPostService
     }
 
     @Override
+    @Transactional
     public void update(UpdatePostRequest request, StreamObserver<BlogPostStatusResponse> responseObserver) {
         BlogPostStatusResponse.Builder res = BlogPostStatusResponse.newBuilder();
 
         try{
-            boolean isUpdate = this.repository.update(request.getId(), request.getSlug(), request.getSummary(), request.getIsPublish(), Instant.parse(request.getPublishDate()));
+            boolean isUpdate = this.repository.update(request.getId(), request.getSlug(), request.getSummary(), request.getIsPublish(), Instant.parse(request.getPublishDate())) > 0;
             if(!isUpdate){
                 res.setStatusCode(HttpStatus.NOT_FOUND.value())
                         .addErrors("Not found post")
