@@ -9,12 +9,15 @@ import com.samithiwat.blog.grpc.tag.*;
 import com.samithiwat.blog.post.entity.Post;
 import com.samithiwat.blog.tag.entity.Tag;
 import io.grpc.stub.StreamObserver;
+import net.devh.boot.grpc.server.service.GrpcService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
 
+@GrpcService
 public class BlogTagGrpcServiceImpl extends BlogTagServiceGrpc.BlogTagServiceImplBase {
     @Autowired
     BlogTagRepository repository;
@@ -128,10 +131,11 @@ public class BlogTagGrpcServiceImpl extends BlogTagServiceGrpc.BlogTagServiceImp
     }
 
     @Override
+    @Transactional
     public void update(UpdateTagRequest request, StreamObserver<BlogTagStatusResponse> responseObserver) {
         BlogTagStatusResponse.Builder res = BlogTagStatusResponse.newBuilder();
 
-        boolean isUpdated = this.repository.update((long) request.getId(), request.getName());
+        boolean isUpdated = this.repository.update((long) request.getId(), request.getName()) > 0;
 
         if(!isUpdated){
             res.setStatusCode(HttpStatus.NOT_FOUND.value())

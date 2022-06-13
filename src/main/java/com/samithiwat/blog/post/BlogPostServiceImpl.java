@@ -1,7 +1,11 @@
 package com.samithiwat.blog.post;
 
 import com.samithiwat.blog.post.entity.Post;
+import org.springframework.stereotype.Service;
 
+// TODO: Handle draft by isPublish
+
+@Service
 public class BlogPostServiceImpl implements BlogPostService {
     private BlogPostRepository repository;
 

@@ -58,7 +58,7 @@ class BlogStatGrpcServiceImplTest {
 
     @Test
     public void testUpdateIncreaseView() throws Exception{
-        Mockito.doReturn(true).when(this.repository).increaseView(1L);
+        Mockito.doReturn(1).when(this.repository).increaseView(1L);
 
 
         UpdateBlogPostStatRequest req = UpdateBlogPostStatRequest.newBuilder()
@@ -87,7 +87,7 @@ class BlogStatGrpcServiceImplTest {
 
     @Test
     public void testUpdateIncreaseLike() throws Exception{
-        Mockito.doReturn(true).when(this.repository).increaseLike(1L);
+        Mockito.doReturn(1).when(this.repository).increaseLike(1L);
 
        UpdateBlogPostStatRequest req =UpdateBlogPostStatRequest.newBuilder()
                .setId(1)
@@ -115,7 +115,7 @@ class BlogStatGrpcServiceImplTest {
 
     @Test
     public void testUpdateDecreaseLike() throws Exception{
-        Mockito.doReturn(true).when(this.repository).decreaseLike(1L);
+        Mockito.doReturn(1).when(this.repository).decreaseLike(1L);
 
         UpdateBlogPostStatRequest req =UpdateBlogPostStatRequest.newBuilder()
                 .setId(1)
@@ -144,7 +144,7 @@ class BlogStatGrpcServiceImplTest {
 
     @Test
     public void testUpdateIncreaseShare() throws Exception{
-        Mockito.doReturn(true).when(this.repository).increaseShare(1L);
+        Mockito.doReturn(1).when(this.repository).increaseShare(1L);
 
         UpdateBlogPostStatRequest req =UpdateBlogPostStatRequest.newBuilder()
                 .setId(1)
@@ -172,7 +172,7 @@ class BlogStatGrpcServiceImplTest {
 
     @Test
     public void testUpdateIncreaseViewNotFound()throws Exception{
-        Mockito.doReturn(false).when(this.repository).increaseView(1L);
+        Mockito.doReturn(0).when(this.repository).increaseView(1L);
 
         UpdateBlogPostStatRequest req = UpdateBlogPostStatRequest.newBuilder()
                 .setId(1)
@@ -200,7 +200,7 @@ class BlogStatGrpcServiceImplTest {
 
     @Test
     public void testUpdateIncreaseLikeNotFound() throws Exception{
-        Mockito.doReturn(false).when(this.repository).increaseLike(1L);
+        Mockito.doReturn(0).when(this.repository).increaseLike(1L);
 
         UpdateBlogPostStatRequest req = UpdateBlogPostStatRequest.newBuilder()
                 .setId(1)
@@ -228,7 +228,7 @@ class BlogStatGrpcServiceImplTest {
 
     @Test
     public void testUpdateDecreaseLikeNotFound() throws Exception{
-        Mockito.doReturn(false).when(this.repository).decreaseLike(1L);
+        Mockito.doReturn(0).when(this.repository).decreaseLike(1L);
 
         UpdateBlogPostStatRequest req = UpdateBlogPostStatRequest.newBuilder()
                 .setId(1)
@@ -256,7 +256,7 @@ class BlogStatGrpcServiceImplTest {
 
     @Test
     public void testUpdateIncreaseShareNotFound()throws Exception{
-        Mockito.doReturn(false).when(this.repository).increaseShare(1L);
+        Mockito.doReturn(0).when(this.repository).increaseShare(1L);
 
         UpdateBlogPostStatRequest req = UpdateBlogPostStatRequest.newBuilder()
                 .setId(1)

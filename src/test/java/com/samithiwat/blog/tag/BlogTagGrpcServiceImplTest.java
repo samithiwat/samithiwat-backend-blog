@@ -426,7 +426,7 @@ class BlogTagGrpcServiceImplTest {
 
     @Test
     public void testUpdateSuccess() throws Exception{
-        Mockito.doReturn(true).when(this.repository).update(this.tag.getId(), this.tag.getName());
+        Mockito.doReturn(1).when(this.repository).update(this.tag.getId(), this.tag.getName());
 
         UpdateTagRequest req = UpdateTagRequest.newBuilder()
                 .setId(Math.toIntExact(this.tag.getId()))
@@ -454,7 +454,7 @@ class BlogTagGrpcServiceImplTest {
 
     @Test
     public void testUpdateNotFoundTag() throws Exception{
-        Mockito.doReturn(false).when(this.repository).update(this.tag.getId(), this.tag.getName());
+        Mockito.doReturn(0).when(this.repository).update(this.tag.getId(), this.tag.getName());
 
         UpdateTagRequest req = UpdateTagRequest.newBuilder()
                 .setId(Math.toIntExact(this.tag.getId()))

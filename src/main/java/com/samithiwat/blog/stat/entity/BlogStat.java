@@ -12,7 +12,7 @@ import java.time.Instant;
 @Entity
 @Table(name = "stat")
 @SQLDelete(sql = "UPDATE user SET deletedDate = CURRENT_DATE WHERE id = ?")
-@Where(clause = "deletedDate IS NULL")
+@Where(clause = "deleted_date IS NULL")
 public class BlogStat {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

@@ -1,5 +1,5 @@
 # Base Image
-FROM openjdk:17-jdk-alpine
+FROM openjdk:18-oraclelinux7
 
 # Working directory
 WORKDIR /app
@@ -14,4 +14,4 @@ COPY ${JAR_FILE} app.jar
 EXPOSE 3008
 
 # Run JAR file
-ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/app.jar"]
+ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "./app.jar"]

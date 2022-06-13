@@ -7,12 +7,14 @@ import com.samithiwat.blog.grpc.dto.BlogComment;
 import com.samithiwat.blog.post.BlogPostServiceImpl;
 import com.samithiwat.blog.post.entity.Post;
 import io.grpc.stub.StreamObserver;
+import net.devh.boot.grpc.server.service.GrpcService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
+@GrpcService
 public class BlogCommentGrpcServiceImpl extends BlogCommentServiceGrpc.BlogCommentServiceImplBase {
     @Autowired
     BlogCommentRepository repository;
@@ -129,12 +131,12 @@ public class BlogCommentGrpcServiceImpl extends BlogCommentServiceGrpc.BlogComme
     public void updateLikes(UpdateCommentLikeRequest request, StreamObserver<BlogCommentStatusResponse> responseObserver) {
         BlogCommentStatusResponse.Builder res = BlogCommentStatusResponse.newBuilder();
 
-        boolean isUpdated = false;
+        boolean isUpdated;
 
         try{
             isUpdated = switch (request.getType()){
-                case LIKE_INCREASE -> this.repository.increaseLike((long) request.getId());
-                case LIKE_DECREASE -> this.repository.decreaseLike((long) request.getId());
+                case LIKE_INCREASE -> this.repository.increaseLike((long) request.getId()) > 0;
+                case LIKE_DECREASE -> this.repository.decreaseLike((long) request.getId()) > 0;
                 default -> throw new InvalidUpdateLikeTypeException();
             };
         }catch (InvalidUpdateLikeTypeException e) {

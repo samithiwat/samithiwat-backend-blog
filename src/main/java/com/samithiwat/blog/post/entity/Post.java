@@ -18,7 +18,7 @@ import java.util.List;
 @Entity
 @Table(name = "post", indexes = @Index(columnList = "slug"))
 @SQLDelete(sql = "UPDATE user SET deletedDate = CURRENT_DATE WHERE id = ?")
-@Where(clause = "deletedDate IS NULL")
+@Where(clause = "deleted_date IS NULL")
 public class Post {
     public Post() {}
 

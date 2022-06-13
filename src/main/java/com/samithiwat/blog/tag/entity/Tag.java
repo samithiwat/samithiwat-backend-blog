@@ -13,7 +13,7 @@ import java.util.List;
 @Entity
 @Table(name = "tag")
 @SQLDelete(sql = "UPDATE user SET deletedDate = CURRENT_DATE WHERE id = ?")
-@Where(clause = "deletedDate IS NULL")
+@Where(clause = "deleted_date IS NULL")
 public class Tag {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

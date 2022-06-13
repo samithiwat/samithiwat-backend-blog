@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -238,18 +239,47 @@ class BlogUserGrpcServiceImplTest {
     }
 
     @Test
-    public void testCreateUserNotFound() throws Exception {
-        Mockito.doReturn(null).when(this.userService).findOne(this.user.getUserId());
-        Mockito.doReturn(this.user).when(this.repository).save(user);
+    public void testCreateUserDuplicated() throws Exception{
+        Mockito.doReturn(this.userDto).when(this.userService).findOne(this.user.getUserId());
+        Mockito.doThrow(new DataIntegrityViolationException("Duplicated userId")).when(this.repository).save(Mockito.any());
 
-        UpdateUserRequest req = UpdateUserRequest.newBuilder()
-                .setId(1)
+        CreateUserRequest req = CreateUserRequest.newBuilder()
+                .setUserId(Math.toIntExact(this.user.getUserId()))
                 .setDescription(user.getDescription())
                 .build();
 
         StreamRecorder<BlogUserResponse> res = StreamRecorder.create();
 
-        service.update(req, res);
+        service.create(req, res);
+
+        if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
+            fail();
+        }
+
+        List<BlogUserResponse> results = res.getValues();
+
+        assertEquals(1, results.size());
+
+        BlogUserResponse result = results.get(0);
+
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY.value(), result.getStatusCode());
+        assertEquals(1, result.getErrorsCount());
+        assertEquals(BlogUser.newBuilder().build(), result.getData());
+    }
+
+    @Test
+    public void testCreateUserNotFound() throws Exception {
+        Mockito.doReturn(null).when(this.userService).findOne(this.user.getUserId());
+        Mockito.doReturn(this.user).when(this.repository).save(Mockito.any());
+
+        CreateUserRequest req = CreateUserRequest.newBuilder()
+                .setUserId(Math.toIntExact(this.user.getUserId()))
+                .setDescription(user.getDescription())
+                .build();
+
+        StreamRecorder<BlogUserResponse> res = StreamRecorder.create();
+
+        service.create(req, res);
 
         if (!res.awaitCompletion(5, TimeUnit.SECONDS)){
             fail();
