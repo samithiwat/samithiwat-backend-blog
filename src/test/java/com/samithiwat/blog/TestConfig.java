@@ -1,4 +1,4 @@
-package com.samithiwat.post;
+package com.samithiwat.blog;
 
 import net.devh.boot.grpc.client.autoconfigure.GrpcClientAutoConfiguration;
 import net.devh.boot.grpc.server.autoconfigure.GrpcServerAutoConfiguration;

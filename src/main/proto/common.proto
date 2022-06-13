@@ -4,7 +4,7 @@ package common;
 
 option go_package = "github.com/samithiwat/samithiwat-backend-user/src/proto";
 option java_multiple_files = true;
-option java_package = "com.samithiwat.user.grpc.common";
+option java_package = "com.samithiwat.blog.grpc.common";
 option java_outer_classname = "Common";
 
 message PaginationQuery {

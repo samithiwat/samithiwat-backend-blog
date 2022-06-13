@@ -4,8 +4,22 @@ package dto;
 
 option go_package = "github.com/samithiwat/samithiwat-backend-user/src/proto";
 option java_multiple_files = true;
-option java_package = "com.samithiwat.user.grpc.dto";
+option java_package = "com.samithiwat.blog.grpc.dto";
 option java_outer_classname = "Dto";
+
+enum SortByType{
+  ALPHABET_ASC = 0;
+  ALPHABET_DESC = 1;
+  ID_ASC = 2;
+  ID_DESC = 3;
+}
+
+enum StatCountType {
+  VIEW_INCREASE = 0;
+  LIKE_INCREASE = 1;
+  LIKE_DECREASE = 2;
+  SHARE_INCREASE = 3;
+}
 
 enum LogType{
   POST = 0;
@@ -107,16 +121,40 @@ message Role {
 
 message BlogPost{
   uint32 id = 1;
-  string slug = 2;
-  string summary = 3;
-  bool isPublish = 4;
-  string PublishDate = 5;
+  BlogUser author = 2;
+  string slug = 3;
+  string summary = 4;
+  bool isPublish = 5;
+  string PublishDate = 6;
+  dto.BlogPostStat stat = 7;
+  repeated BlogPostSection sections = 8;
 }
 
 message BlogPostSection{
   uint32 id = 1;
-  uint32 postId = 2;
-  uint32 order = 3;
-  PostContentType contentType = 4;
-  string content = 5;
+  uint32 pos = 2;
+  PostContentType contentType = 3;
+  string content = 4;
+}
+
+message BlogPostStat{
+  uint32 id = 1;
+  uint32 likes = 2;
+  uint32 views = 3;
+  uint32 shares = 4;
+}
+
+message BlogComment{
+  uint32 id = 1;
+  uint32 userId = 2;
+  string content = 3;
+  uint32 likes = 4;
+  string createdDate = 5;
+  string updatedDate = 6;
+}
+
+message BlogTag{
+  uint32 id = 1;
+  string name = 2;
+  repeated BlogPost posts = 3;
 }

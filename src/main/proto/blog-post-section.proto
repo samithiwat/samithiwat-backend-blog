@@ -5,14 +5,14 @@ package blog_post_section;
 import "dto.proto";
 
 option java_multiple_files = true;
-option java_package = "com.samithiwat.user.grpc.blogsection";
+option java_package = "com.samithiwat.blog.grpc.section";
 option java_outer_classname = "BlogPostSection";
 
 service BlogPostSectionService{
-  rpc findOne(FindOnePostRequest) returns (BlogPostSectionResponse) {}
-  rpc create(CreatePostRequest) returns (BlogPostSectionResponse) {}
-  rpc update(UpdatePostRequest) returns (BlogPostSectionResponse) {}
-  rpc delete(DeletePostRequest) returns (BlogPostSectionResponse) {}
+  rpc findOne(FindOnePostSectionRequest) returns (BlogPostSectionResponse) {}
+  rpc create(CreatePostSectionRequest) returns (BlogPostSectionResponse) {}
+  rpc update(UpdatePostSectionRequest) returns (BlogPostSectionStatusResponse) {}
+  rpc delete(DeletePostSectionRequest) returns (BlogPostSectionStatusResponse) {}
 }
 
 message BlogPostSectionResponse {
@@ -21,31 +21,37 @@ message BlogPostSectionResponse {
   dto.BlogPostSection data = 3;
 }
 
+message BlogPostSectionStatusResponse {
+  int32 StatusCode = 1;
+  repeated string errors = 2;
+  bool data = 3;
+}
+
 // findOne
 
-message FindOnePostRequest{
+message FindOnePostSectionRequest{
   uint32 id = 1;
 }
 
 // create
 
-message CreatePostRequest{
+message CreatePostSectionRequest{
   uint32 postId = 1;
-  uint32 order = 2;
+  uint32 pos = 2;
   dto.PostContentType contentType = 3;
   string content = 4;
 }
 
 // update
 
-message UpdatePostRequest{
+message UpdatePostSectionRequest{
   uint32 id = 1;
-  uint32 order = 2;
+  uint32 pos = 2;
   string content = 3;
 }
 
 // delete
 
-message DeletePostRequest{
+message DeletePostSectionRequest{
   uint32 id = 1;
 }
