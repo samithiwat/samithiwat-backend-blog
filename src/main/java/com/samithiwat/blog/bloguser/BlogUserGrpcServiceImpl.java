@@ -103,14 +103,15 @@ public class BlogUserGrpcServiceImpl extends BlogUserServiceGrpc.BlogUserService
     }
 
     @Override
-    public void deleteBookmark(DeleteBookmarkRequest request, StreamObserver<BookmarkResponse> responseObserver) {
-        BookmarkResponse.Builder res = BookmarkResponse.newBuilder();
+    public void deleteBookmark(DeleteBookmarkRequest request, StreamObserver<BookmarkStatusResponse> responseObserver) {
+        BookmarkStatusResponse.Builder res = BookmarkStatusResponse.newBuilder();
 
         BUser user = this.repository.findById((long) request.getUserId()).orElse(null);
 
         if(user == null){
             res.setStatusCode(HttpStatus.NOT_FOUND.value())
-                    .addErrors("Not found user");
+                    .addErrors("Not found user")
+                    .setData(false);
 
             responseObserver.onNext(res.build());
             responseObserver.onCompleted();
@@ -127,11 +128,7 @@ public class BlogUserGrpcServiceImpl extends BlogUserServiceGrpc.BlogUserService
 
         this.repository.save(user);
 
-        for (Post p:posts) {
-            res.addData(Math.toIntExact(p.getId()));
-        }
-
-        res.setStatusCode(HttpStatus.OK.value());
+        res.setStatusCode(HttpStatus.OK.value()).setData(true);
 
         responseObserver.onNext(res.build());
         responseObserver.onCompleted();
@@ -157,7 +154,8 @@ public class BlogUserGrpcServiceImpl extends BlogUserServiceGrpc.BlogUserService
 
         if(post == null){
             res.setStatusCode(HttpStatus.NOT_FOUND.value())
-                    .addErrors("Not found post");
+                    .addErrors("Not found post")
+                    .setData(false);
 
             responseObserver.onNext(res.build());
             responseObserver.onCompleted();

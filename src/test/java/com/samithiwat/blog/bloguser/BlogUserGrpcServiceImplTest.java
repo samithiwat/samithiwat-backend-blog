@@ -580,10 +580,6 @@ class BlogUserGrpcServiceImplTest {
 
     @Test
     public void testDeleteBookmarkSuccess() throws Exception{
-        List<Integer> want = new ArrayList<Integer>();
-        want.add(1);
-        want.add(2);
-
         Mockito.doReturn(Optional.of(this.user)).when(this.repository).findById(1L);
 
         DeleteBookmarkRequest req = DeleteBookmarkRequest.newBuilder()
@@ -591,7 +587,7 @@ class BlogUserGrpcServiceImplTest {
                 .setPostId(3)
                 .build();
 
-        StreamRecorder<BookmarkResponse> res = StreamRecorder.create();
+        StreamRecorder<BookmarkStatusResponse> res = StreamRecorder.create();
 
         service.deleteBookmark(req, res);
 
@@ -599,15 +595,15 @@ class BlogUserGrpcServiceImplTest {
             fail();
         }
 
-        List<BookmarkResponse> results = res.getValues();
+        List<BookmarkStatusResponse> results = res.getValues();
 
         assertEquals(1, results.size());
 
-        BookmarkResponse result = results.get(0);
+        BookmarkStatusResponse result = results.get(0);
 
         assertEquals(HttpStatus.OK.value(), result.getStatusCode());
         assertEquals(0, result.getErrorsCount());
-        assertEquals(want, result.getDataList());
+        assertTrue(result.getData());
     }
 
     @Test
@@ -619,7 +615,7 @@ class BlogUserGrpcServiceImplTest {
                 .setPostId(3)
                 .build();
 
-        StreamRecorder<BookmarkResponse> res = StreamRecorder.create();
+        StreamRecorder<BookmarkStatusResponse> res = StreamRecorder.create();
 
         service.deleteBookmark(req, res);
 
@@ -627,15 +623,15 @@ class BlogUserGrpcServiceImplTest {
             fail();
         }
 
-        List<BookmarkResponse> results = res.getValues();
+        List<BookmarkStatusResponse> results = res.getValues();
 
         assertEquals(1, results.size());
 
-        BookmarkResponse result = results.get(0);
+        BookmarkStatusResponse result = results.get(0);
 
         assertEquals(HttpStatus.NOT_FOUND.value(), result.getStatusCode());
         assertEquals(1, result.getErrorsCount());
-        assertEquals(new ArrayList<Integer>(), result.getDataList());
+        assertFalse(result.getData());
     }
 
     @Test

@@ -15,7 +15,7 @@ service BlogUserService{
   rpc delete(DeleteUserRequest) returns (BlogUserResponse) {}
   rpc addBookmark(AddBookmarkRequest) returns (BookmarkResponse) {}
   rpc findAllBookmark(FindAllBookmarkRequest) returns (BookmarkResponse){}
-  rpc deleteBookmark(DeleteBookmarkRequest) returns(BookmarkResponse) {}
+  rpc deleteBookmark(DeleteBookmarkRequest) returns(BookmarkStatusResponse) {}
   rpc read(ReadRequest) returns (ReadResponse) {}
 }
 
@@ -59,7 +59,9 @@ message BookmarkResponse{
 }
 
 message BookmarkStatusResponse{
-  bool data = 1;
+  int32 StatusCode = 1;
+  repeated string errors = 2;
+  bool data = 3;
 }
 
 // addBookmark
